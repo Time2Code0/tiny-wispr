@@ -45,7 +45,7 @@ jobs:
       - name: Cache Rust builds
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          key: verify
+          key: verify-portable
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -128,7 +128,7 @@ jobs:
       - name: Cache Rust builds
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          key: verify
+          key: verify-portable
 
       # Tauri's build script needs the frontend folder and the sidecar to exist.
       - name: Prepare the build

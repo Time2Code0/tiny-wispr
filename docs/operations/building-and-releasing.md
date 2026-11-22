@@ -33,6 +33,12 @@ The CSP in `tauri.conf.json` allows only the app's own files and Tauri IPC (`con
 
 `build.rs` links clang's runtime on macOS: whisper.cpp's Metal backend uses `@available`, which needs `__isPlatformVersionAtLeast`, and rustc links with `-nodefaultlibs`. If the link fails on that symbol after a toolchain change, look there first.
 
+## CPU baseline
+
+`.cargo/config.toml` sets `GGML_NATIVE=OFF` and, on 64-bit Intel and AMD, `target-cpu=x86-64-v3` (AVX2, FMA, F16C, BMI2). Without it whisper.cpp compiles for the CPU of the machine that builds it: a release built on a CI runner with AVX-512 then crashes with an illegal instruction (`0xc000001d` on Windows, `SIGILL` elsewhere) on a computer without it. llama.cpp derives its flags from the Rust target CPU, so both libraries get the same baseline. Apple Silicon builds use the compiler's default for `arm64-apple-macos`, which every M-series chip runs.
+
+whisper-rs-sys doesn't rebuild when `GGML_*` variables change, so after changing the baseline run `cargo clean -p whisper-rs-sys` locally, and change the `key` of the `Swatinem/rust-cache` steps in `.github/workflows/` so CI doesn't restore an old build.
+
 ## Signing
 
 | Build | Identity | Why |

@@ -1,0 +1,19 @@
+# Builds run on other people's computers, so whisper.cpp and llama.cpp must not
+# be compiled for the CPU that builds them (ggml's GGML_NATIVE, on by default
+# in whisper.cpp). Releases built on a CI machine with AVX-512 crash with an
+# illegal instruction on a PC without it.
+#
+# x86-64-v3 (AVX2, FMA, F16C, BMI2) is the baseline on 64-bit Intel and AMD:
+# Intel since 2013 (Haswell), AMD since 2015. llama-cpp-sys-2 derives its ggml
+# flags from the Rust target CPU; whisper-rs-sys turns on the same set when
+# GGML_NATIVE is off. Apple Silicon builds use the compiler's default for
+# arm64-apple-macos, which every M-series chip runs.
+
+[env]
+GGML_NATIVE = "OFF"
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-cpu=x86-64-v3"]
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "target-cpu=x86-64-v3"]

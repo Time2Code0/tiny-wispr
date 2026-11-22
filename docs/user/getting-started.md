@@ -5,6 +5,7 @@ Tiny Wispr turns speech into text on your own computer. You hold a key, say some
 ## What you need
 
 - macOS 13 or later on Apple Silicon, Windows 10 or 11 (x64), or Linux (x64) with an X11 session. macOS is the platform the app is tested on most; Windows and Linux builds are published with every release but get less testing. Linux on Wayland can't use global shortcuts or paste into other apps.
+- On Windows and Linux, a processor with AVX2: Intel from 2013 (Haswell) or AMD from 2015 on. Older processors aren't supported.
 - A microphone.
 - Room for a voice model: from about 75 MB (Tiny) to about 3 GB (Large v3). The setup recommends one for your computer.
 
