@@ -23,6 +23,7 @@ Tauri v2 app. The Rust workspace and the Vite + React frontend both live at the 
 - `pnpm tauri build --bundles app` builds the release app.
 - `pnpm app:mac` builds the debug app bundle and opens it. It signs with a self-signed "Tiny Wispr Development" certificate, which it creates in the login keychain on first run, so macOS keeps the Microphone, Accessibility and Input Monitoring grants across rebuilds. An ad hoc signature changes with every build and loses them.
 - `pnpm verify` runs all of the above plus `pnpm build`.
+- `pnpm release <version>` sets the version in all three places, updates `CHANGELOG.md`, commits and tags. Pushing the tag runs `.github/workflows/release.yml`, which builds, signs and publishes the GitHub release the in-app updater reads. Runbook: `docs/operations/building-and-releasing.md`.
 
 whisper.cpp and llama.cpp build with CMake, so `cmake` must be on `PATH` before any cargo command.
 

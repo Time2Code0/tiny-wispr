@@ -10,9 +10,9 @@ Tiny Wispr turns speech into text on your own computer. You hold a key, say some
 
 ## Install
 
-There is no download page yet. Build the app from source: see [Building and releasing](../operations/building-and-releasing.md). That produces `Tiny Wispr.app` in `target/release/bundle/macos/`.
+Download `Tiny-Wispr_<version>_aarch64.dmg` from the [latest release](https://github.com/Time2Code0/tiny-wispr/releases/latest), open it and drag Tiny Wispr to Applications. Releases are built for Macs with Apple Silicon. On an Intel Mac, build the app from source: see [Building and releasing](../operations/building-and-releasing.md).
 
-Release builds aren't notarized. The first time you open one, macOS may ask you to confirm: right-click the app, choose Open, then Open again.
+Tiny Wispr isn't notarized by Apple, so the first time you open it macOS says it can't check the app for malicious software. Open **System Settings → Privacy & Security**, scroll down to the message about Tiny Wispr, and click **Open Anyway**. You only do this once: updates install from inside the app (see [Updating](updating.md)).
 
 ## First run
 

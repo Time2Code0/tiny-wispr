@@ -35,18 +35,71 @@ The CSP in `tauri.conf.json` allows only the app's own files and Tauri IPC (`con
 
 ## Signing
 
-Where things stand:
+| Build | Identity | Why |
+| --- | --- | --- |
+| Dev (`pnpm app:mac`) | Self-signed *Tiny Wispr Development*, made in your login keychain on first run | macOS keeps permission grants across rebuilds. See [Development](development.md#why-appmac-makes-a-certificate). |
+| Local `pnpm tauri build` | Ad hoc (`signingIdentity: "-"`) | Fine for trying a build. Not for sharing: the signature changes every build. |
+| Release (CI) | Self-signed *Tiny Wispr*, from the `MACOS_CERTIFICATE` secret | The same certificate signs every release, so users keep their grants across updates. |
 
-- **Dev builds** (`pnpm app:mac`) are signed with a self-signed *Tiny Wispr Development* certificate, so macOS keeps permission grants across rebuilds. See [Development](development.md#why-appmac-makes-a-certificate).
-- **Release builds** are signed ad hoc (`signingIdentity: "-"`). An ad hoc signature changes with every build, so a user who updates loses the macOS permission grants, and Gatekeeper warns when opening the app.
-- **Notarization isn't set up.** A build distributed outside your own machine needs a Developer ID certificate, hardened-runtime signing with the entitlements above, and notarization (`xcrun notarytool`) before people can open it without a warning. Until then, tell testers to right-click → Open the first time.
-- Signing the worker: the sidecar must be signed with the same identity as the app, and a notarized bundle needs it signed with the hardened runtime too. Check `codesign --verify --deep --strict "Tiny Wispr.app"` after any signing change.
+There is no Apple Developer account, so releases aren't notarized. Gatekeeper blocks the first launch of a downloaded copy until the user clicks **Open Anyway** in System Settings → Privacy & Security. The release notes and [Getting started](../user/getting-started.md#install) say so. Updates installed by the app don't trigger it again: the app writes the new bundle itself, so it has no quarantine flag.
 
-Whatever the identity is, **keep it the same from release to release**: a changing signature is what makes users re-grant Accessibility and Input Monitoring.
+The sidecar must be signed with the same identity as the app. The release workflow checks that both `tiny-wispr` and `tw-llm-worker` show `Authority=Tiny Wispr` and that `codesign --verify --deep --strict` passes.
+
+**Never change the release certificate.** macOS ties the Microphone, Accessibility and Input Monitoring grants to it; a release signed with a different one makes every user grant them again. It is valid for 20 years.
+
+## Keys and secrets
+
+Two keys, both made once on a maintainer's Mac and kept outside the repo (by default in `~/.tiny-wispr-release-keys/`, mode 700). **Keep a copy of every file there in a password manager.** Losing the certificate resets everyone's permissions on the next release; losing the updater key means installed apps can never update again and have to be reinstalled by hand.
+
+| File | Made with | GitHub secret |
+| --- | --- | --- |
+| `release-certificate.p12` | `node scripts/make-release-cert.mjs` | `MACOS_CERTIFICATE` (base64 of the file) |
+| `release-certificate.password` | the same | `MACOS_CERTIFICATE_PASSWORD` |
+| `updater.key` | `tauri signer generate --ci -p <password> -w updater.key` | `TAURI_SIGNING_PRIVATE_KEY` (the file's contents) |
+| `updater.key.password` | the same | `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` |
+| `updater.key.pub` | the same | none: it's `plugins.updater.pubkey` in `tauri.conf.json` |
+
+Set or replace the secrets with:
+
+```sh
+keys=~/.tiny-wispr-release-keys
+base64 -i "$keys/release-certificate.p12" | gh secret set MACOS_CERTIFICATE
+gh secret set MACOS_CERTIFICATE_PASSWORD < "$keys/release-certificate.password"
+gh secret set TAURI_SIGNING_PRIVATE_KEY < "$keys/updater.key"
+gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD < "$keys/updater.key.password"
+```
+
+Call the updater binary directly (`node_modules/.bin/tauri signer generate …`): `pnpm tauri …` prints the command line, password included.
 
 ## Versions
 
-The version is in three places that must agree: `version` in `package.json`, `version` in `src-tauri/tauri.conf.json`, and `[workspace.package] version` in the root `Cargo.toml`. The About page shows the `package.json` one. There is no updater and no automatic update check, by design: the app makes no network requests apart from model downloads.
+The version is in three places that must agree: `version` in `package.json`, `version` in `src-tauri/tauri.conf.json`, and `[workspace.package] version` in the root `Cargo.toml`. The About page shows the `package.json` one; the updater compares the one Tauri reads from `tauri.conf.json`. `pnpm release` changes all three, and the release workflow refuses a tag that doesn't match them (`scripts/release-ci.mjs check-version`).
+
+Versions are semver. `X.Y.Z` is a release; `X.Y.Z-rc.N` (any suffix) is a prerelease.
+
+## The release workflow
+
+`.github/workflows/release.yml` runs when a `v*.*.*` tag is pushed.
+
+| Job | Runs on | Does |
+| --- | --- | --- |
+| `preflight` | ubuntu | The tag matches the three versions; a release tag (no suffix) is on `main`; the four secrets are set |
+| `verify` | macos-15 | `.github/workflows/ci.yml`: `pnpm verify`, then a smoke run of the debug build with a `say` recording and `ggml-tiny.en.bin` |
+| `build` | macos-15 (Apple Silicon) | Imports the certificate into a temporary keychain, `pnpm tauri build --bundles app,dmg` with `createUpdaterArtifacts`, checks the code signature, checks the update signature names the version and verifies with the public key in `tauri.conf.json`, starts the app and checks it's still running after 20 seconds |
+| `release` | ubuntu | Writes the notes, `latest.json` and `SHA256SUMS`, creates a draft release with every file, then publishes it |
+
+The release files:
+
+- `Tiny-Wispr_<version>_aarch64.dmg`: what people download.
+- `Tiny-Wispr_<version>_aarch64.app.tar.gz` and its `.sig`: what the updater downloads.
+- `latest.json`: the manifest the updater reads ([Updates](../internals/updates.md#the-manifest)).
+- `SHA256SUMS`.
+
+A release tag is published as the latest release, which installed apps are offered. A prerelease is published as a GitHub prerelease: `releases/latest` skips it, so no installed app is offered it unless pointed at it with `TINY_WISPR_UPDATE_URL`. Only Apple Silicon is built. Intel Macs build from source.
+
+The notes come from the commit subjects since the previous tag (`scripts/release-ci.mjs notes`): `feat`, `fix` and `perf` commits, grouped, with the first letter capitalised. Everything else is left out. That is why commit subjects are written for people.
+
+`.github/workflows/ci.yml` also runs on every push to `main` and every pull request.
 
 ## Windows and Linux
 
@@ -59,10 +112,30 @@ The code has Windows and Linux (X11) implementations behind `cfg` ([OS integrati
 
 ## Release checklist
 
-1. `pnpm verify` is green on a clean checkout (and on the release platform).
-2. Smoke run with a real voice model, and once with a language model selected.
-3. Bump the version in the three places above.
-4. `pnpm tauri build --bundles app`.
-5. Open the built app **from the bundle** on a machine or user account that has never run it: onboarding appears, each permission prompt names Tiny Wispr, the first dictation works after downloading a model.
-6. Check Settings → Privacy → Network activity lists only the model download you did.
-7. Tag the commit.
+1. On `main`, with everything merged and CI green: `pnpm release 0.2.0`. It refuses a dirty tree, a version that isn't newer, or a release (not a prerelease) from another branch.
+2. Read the notes it prints. They become the release notes and the "What's new" text in the app.
+3. `git push origin main v0.2.0`.
+4. Watch the Release workflow. When it's done, the release page has the DMG, the archive, its signature, `latest.json` and `SHA256SUMS`.
+5. On a Mac running the previous release: Settings → About → **Check for updates**, **Download**, **Restart to update**. The app comes back on the new version, the permissions still work, and Network activity lists `latest.json` and the archive.
+6. Open the DMG on a user account that has never run the app: **Open Anyway** is needed once, onboarding appears, the first dictation works after downloading a model.
+
+## Testing an update
+
+Before a change to the updater or the release workflow reaches users, release it as prereleases from the branch:
+
+1. On the branch: `pnpm release 0.2.0-rc.1`, push the branch and the tag. Install that build from its DMG and grant the permissions.
+2. `pnpm release 0.2.0-rc.2`, push.
+3. Quit Tiny Wispr and start rc.1 pointed at rc.2's manifest:
+
+   ```sh
+   TINY_WISPR_UPDATE_URL=https://github.com/Time2Code0/tiny-wispr/releases/download/v0.2.0-rc.2/latest.json \
+     "/Applications/Tiny Wispr.app/Contents/MacOS/tiny-wispr"
+   ```
+
+4. Check, download, restart. About shows rc.2, dictation works without granting anything again.
+
+A local server works too: build with the updater key in the environment (`TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`) and `--config '{"bundle":{"createUpdaterArtifacts":true}}'`, sign the archive with `tauri signer sign --app-version`, write a `latest.json` by hand that points at `http://localhost:…`, and serve the folder.
+
+## Pulling a bad release
+
+Installed apps read `latest.json` from the newest published release. To stop offering a broken one, delete the release (or mark it as a prerelease) on GitHub: `releases/latest` then points at the one before, and nobody else is offered the bad version. Apps that already installed it stay on it, because the updater never offers an older version. Fix forward with a new patch release.

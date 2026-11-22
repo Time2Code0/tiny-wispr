@@ -12,6 +12,7 @@
     "dev": "vite --port 1420 --strictPort",
     "fix": "ultracite fix",
     "preview": "vite preview --port 1420 --strictPort",
+    "release": "node scripts/release.mjs",
     "tauri": "tauri",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -38,7 +38,7 @@ For building, testing and shipping.
 
 - [Development](operations/development.md): toolchain, running the app, the browser-only mode
 - [Testing](operations/testing.md): the test layers and how to test without a microphone
-- [Building and releasing](operations/building-and-releasing.md): release builds, the worker sidecar, signing
+- [Building and releasing](operations/building-and-releasing.md): release builds, the worker sidecar, signing, the release workflow
 
 The conventions that apply to every change (code style, UI tokens, commit messages) are in [AGENTS.md](../AGENTS.md).
 
