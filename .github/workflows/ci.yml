@@ -1,0 +1,85 @@
+name: CI
+
+# `pnpm verify` and one scripted dictation on Apple Silicon. The release
+# workflow calls this too, so nothing is published that fails it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+
+      - name: Cache Rust builds
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: verify
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: pnpm verify
+
+      - name: Cache the test voice model
+        id: voice-model
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/tiny-wispr-ci/models
+          key: whisper-ggml-tiny.en-v1
+
+      - name: Download the test voice model
+        if: steps.voice-model.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/tiny-wispr-ci/models/whisper
+          curl --fail --location --silent --show-error \
+            --output ~/tiny-wispr-ci/models/whisper/ggml-tiny.en.bin \
+            https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin
+
+      # Debug builds run one dictation from a WAV and write what they would
+      # have pasted (src-tauri/src/dictation/smoke.rs).
+      - name: Smoke run
+        run: |
+          cargo build -p tiny-wispr
+          work="$RUNNER_TEMP/smoke"
+          mkdir -p "$work/data"
+          say --file-format=WAVE --data-format=LEI16@16000 -o "$work/speech.wav" \
+            -- "The quick brown fox jumps over the lazy dog."
+          TINY_WISPR_SMOKE="$work/speech.wav" \
+          TINY_WISPR_SMOKE_OUT="$work/out.txt" \
+          TINY_WISPR_MODELS_DIR="$HOME/tiny-wispr-ci/models" \
+          TINY_WISPR_DATA_DIR="$work/data" \
+            target/debug/tiny-wispr
+          echo "Inserted: $(cat "$work/out.txt")"
+          grep -qi "fox" "$work/out.txt"
