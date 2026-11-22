@@ -1,0 +1,27 @@
+[package]
+name = "tw-llm-worker"
+description = "Out-of-process llama.cpp runner for Tiny Wispr, spoken to over JSON lines on stdin/stdout."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+cuda = ["llama-cpp-2/cuda"]
+vulkan = ["llama-cpp-2/vulkan"]
+
+[dependencies]
+anyhow.workspace = true
+llama-cpp-2 = { version = "0.1.161", default-features = false }
+serde_json.workspace = true
+tw-llm.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+llama-cpp-2 = { version = "0.1.161", default-features = false, features = ["metal"] }
+
+[dev-dependencies]
+tw-core.workspace = true
+
+[lints]
+workspace = true

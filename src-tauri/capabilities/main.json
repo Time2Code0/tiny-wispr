@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "The hub window: listen to app events, drag the overlay title bar, pick a model file to import.",
+  "windows": ["main"],
+  "permissions": [
+    "core:app:default",
+    "core:event:default",
+    "core:path:default",
+    "core:window:default",
+    "core:window:allow-start-dragging",
+    "dialog:allow-open"
+  ]
+}

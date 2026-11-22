@@ -1,0 +1,106 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./fonts.css";
+@import "./animations.css";
+@import "./hitbox.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-transparent: transparent;
+
+  --color-background: oklch(0.985 0.004 75);
+  --color-background-muted: oklch(0.958 0.008 75);
+
+  --color-accent: oklch(0.935 0.014 70);
+
+  --color-foreground: oklch(0.205 0.015 45);
+  --color-foreground-muted: oklch(0.48 0.018 55);
+
+  --color-primary: oklch(0.676 0.217 38.802);
+  --color-secondary: oklch(0.804 0.119 232.686);
+
+  --color-destructive: oklch(0.58 0.22 25);
+  --color-destructive-foreground: oklch(0.48 0.18 25);
+  --color-destructive-background: oklch(0.96 0.018 25);
+  --color-destructive-subtel: oklch(0.91 0.042 25);
+
+  --color-info: oklch(0.58 0.16 250);
+  --color-info-foreground: oklch(0.48 0.13 250);
+  --color-info-background: oklch(0.96 0.018 250);
+  --color-info-subtel: oklch(0.91 0.04 250);
+
+  --color-success: oklch(0.58 0.16 145);
+  --color-success-foreground: oklch(0.48 0.13 145);
+  --color-success-background: oklch(0.96 0.028 145);
+  --color-success-subtel: oklch(0.91 0.06 145);
+
+  --color-warning: oklch(0.58 0.12 75);
+  --color-warning-foreground: oklch(0.48 0.09 75);
+  --color-warning-background: oklch(0.96 0.03 75);
+  --color-warning-subtel: oklch(0.91 0.065 75);
+}
+
+.dark {
+  --color-background: oklch(0.17 0.008 55);
+  --color-background-muted: oklch(0.21 0.01 55);
+
+  --color-accent: oklch(0.265 0.014 55);
+
+  --color-foreground: oklch(0.965 0.006 75);
+  --color-foreground-muted: oklch(0.72 0.018 65);
+
+  --color-destructive: oklch(0.58 0.22 25);
+  --color-destructive-foreground: oklch(0.7 0.19 25);
+  --color-destructive-background: oklch(0.23 0.045 25);
+  --color-destructive-subtel: oklch(0.32 0.085 25);
+
+  --color-info: oklch(0.58 0.16 250);
+  --color-info-foreground: oklch(0.78 0.115 250);
+  --color-info-background: oklch(0.23 0.04 250);
+  --color-info-subtel: oklch(0.32 0.075 250);
+
+  --color-success: oklch(0.58 0.16 145);
+  --color-success-foreground: oklch(0.78 0.115 145);
+  --color-success-background: oklch(0.23 0.04 145);
+  --color-success-subtel: oklch(0.32 0.075 145);
+
+  --color-warning: oklch(0.58 0.12 75);
+  --color-warning-foreground: oklch(0.78 0.105 75);
+  --color-warning-background: oklch(0.23 0.035 75);
+  --color-warning-subtel: oklch(0.32 0.06 75);
+}
+
+@theme inline {
+  --font-sans:
+    var(--font-geist-sans), "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+
+  --font-mono:
+    var(--font-geist-mono), "ui-monospace", "SFMono-Regular", "Menlo", "Monaco",
+    "Consolas", "Liberation Mono", "Courier New", "monospace";
+
+  --font-redaction:
+    var(--font-redaction), var(--font-geist-mono), "ui-monospace",
+    "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono",
+    "Courier New", "monospace";
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before {
+    @apply border-foreground/10;
+  }
+
+  html {
+    @apply scrollbar-thin scrollbar-thumb-accent scrollbar-track-background;
+  }
+
+  /* WebKit rubber-bands the page even when nothing overflows; a desktop
+     window should stay put. */
+  html,
+  body {
+    @apply overscroll-none;
+  }
+}

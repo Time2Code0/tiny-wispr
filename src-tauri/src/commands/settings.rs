@@ -1,0 +1,84 @@
+use tauri::{AppHandle, State};
+use tw_core::hotkey::{Platform, Shortcuts};
+use tw_core::{Settings, SettingsPatch};
+
+use crate::dictation::Msg;
+use crate::error::CommandResult;
+use crate::state::AppState;
+use crate::{events, pill, tray};
+
+#[tauri::command]
+pub fn get_settings(state: State<'_, AppState>) -> Settings {
+    state.data.settings.get()
+}
+
+#[tauri::command]
+pub fn update_settings(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    patch: SettingsPatch,
+) -> CommandResult<Settings> {
+    if let Some(enabled) = patch.launch_at_login
+        && enabled != state.data.settings.get().launch_at_login
+    {
+        tw_os::autostart::set_enabled(enabled)?;
+    }
+    save(&app, &state, |s| s.apply(patch))
+}
+
+#[tauri::command]
+pub fn reset_shortcuts(app: AppHandle, state: State<'_, AppState>) -> CommandResult<Settings> {
+    save(&app, &state, |s| {
+        s.shortcuts = Shortcuts::defaults(Platform::current());
+    })
+}
+
+/// Applies `change`, persists it, emits `settings:changed` and applies the
+/// settings that take effect immediately.
+pub fn save(
+    app: &AppHandle,
+    state: &AppState,
+    change: impl FnOnce(&mut Settings),
+) -> CommandResult<Settings> {
+    let before = state.data.settings.get();
+    let settings = state.data.settings.update(change)?;
+    events::emit(app, events::SETTINGS_CHANGED, settings.clone());
+    pill::sync_visibility(app);
+    if before.shortcuts != settings.shortcuts {
+        state.dictation.send(Msg::SettingsChanged);
+    }
+    if before.microphone != settings.microphone {
+        tray::refresh(app);
+    }
+    if before.show_in_dock != settings.show_in_dock {
+        show_in_dock(app, settings.show_in_dock);
+    }
+    if settings.offline && !before.offline {
+        state.models.pause_all();
+    }
+    if before.history_retention != settings.history_retention {
+        match state.data.change_history(|_| ()) {
+            Ok(()) => events::emit(app, events::HISTORY_CHANGED, ()),
+            Err(err) => tracing::warn!(%err, "could not apply history retention"),
+        }
+    }
+    Ok(settings)
+}
+
+/// macOS: a regular app with a Dock icon, or an accessory that lives in the
+/// menu bar only.
+pub fn show_in_dock(app: &AppHandle, visible: bool) {
+    #[cfg(target_os = "macos")]
+    {
+        let policy = if visible {
+            tauri::ActivationPolicy::Regular
+        } else {
+            tauri::ActivationPolicy::Accessory
+        };
+        if let Err(err) = app.set_activation_policy(policy) {
+            tracing::warn!(%err, "could not change the Dock icon");
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    let _ = (app, visible);
+}

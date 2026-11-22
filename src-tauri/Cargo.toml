@@ -1,0 +1,42 @@
+[package]
+name = "tiny-wispr"
+description = "Local, private dictation: hold a key, speak, release."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+default-run = "tiny-wispr"
+
+[lib]
+name = "tiny_wispr_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7", features = [] }
+
+[dependencies]
+anyhow.workspace = true
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+cpal = "0.18.2"
+serde.workspace = true
+serde_json.workspace = true
+sysinfo = { version = "0.40", default-features = false, features = ["system"] }
+tauri = { version = "2.12", features = ["tray-icon", "macos-private-api"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-single-instance = "2"
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tw-audio.workspace = true
+tw-core.workspace = true
+tw-llm.workspace = true
+tw-models.workspace = true
+tw-os.workspace = true
+tw-stt.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSResponder", "NSWindow"] }
+
+[lints]
+workspace = true

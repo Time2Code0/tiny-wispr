@@ -1,0 +1,20 @@
+[package]
+name = "tw-audio"
+description = "Microphone capture, resampling to 16 kHz mono, level meter, energy VAD, audio file decoding and WAV helpers."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+cpal = "0.18.2"
+hound = "3.5.1"
+rubato = "5.1.0"
+symphonia = { version = "0.6.1", default-features = false, features = ["wav", "pcm", "mp3", "isomp4", "aac", "flac", "ogg", "vorbis"] }
+thiserror.workspace = true
+tracing.workspace = true
+tw-core.workspace = true
+
+[lints]
+workspace = true

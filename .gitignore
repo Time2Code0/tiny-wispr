@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+target/
+src-tauri/gen/
+src-tauri/binaries/
+
+# models downloaded during development
+models/
+*.gguf
+ggml-*.bin
+
+# misc
+.DS_Store
+*.tsbuildinfo
+*.log
+.env*
+coverage/

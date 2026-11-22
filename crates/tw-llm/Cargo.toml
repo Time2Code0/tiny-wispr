@@ -1,0 +1,17 @@
+[package]
+name = "tw-llm"
+description = "JSON-lines protocol and client for the tw-llm-worker process."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tw-core.workspace = true
+
+[lints]
+workspace = true

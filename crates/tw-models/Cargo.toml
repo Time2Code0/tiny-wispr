@@ -1,0 +1,19 @@
+[package]
+name = "tw-models"
+description = "Model downloads (resumable, verified) and the on-disk model inventory."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+fs4 = "1"
+sha2 = "0.10"
+sysinfo = { version = "0.40", default-features = false, features = ["system"] }
+thiserror.workspace = true
+tw-core.workspace = true
+ureq = { version = "3.5", default-features = false, features = ["rustls"] }
+
+[lints]
+workspace = true

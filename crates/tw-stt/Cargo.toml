@@ -1,0 +1,25 @@
+[package]
+name = "tw-stt"
+description = "Speech to text with whisper.cpp."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+# GPU backends other than Metal need their SDKs at build time, so they are opt-in.
+cuda = ["whisper-rs/cuda"]
+vulkan = ["whisper-rs/vulkan"]
+
+[dependencies]
+thiserror.workspace = true
+tracing.workspace = true
+tw-audio.workspace = true
+whisper-rs = { version = "0.16.0", features = ["tracing_backend"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+whisper-rs = { version = "0.16.0", features = ["tracing_backend", "metal"] }
+
+[lints]
+workspace = true

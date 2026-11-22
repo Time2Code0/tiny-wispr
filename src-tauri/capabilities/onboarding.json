@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "onboarding",
+  "description": "The first-run window: listen to app events, drag the overlay title bar.",
+  "windows": ["onboarding"],
+  "permissions": [
+    "core:app:default",
+    "core:event:default",
+    "core:window:default",
+    "core:window:allow-start-dragging"
+  ]
+}

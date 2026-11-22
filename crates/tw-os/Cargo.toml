@@ -1,0 +1,68 @@
+[package]
+name = "tw-os"
+description = "Per-OS integration: global keys, text insertion, permissions, frontmost app, launch at login."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+tracing.workspace = true
+tw-core.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+block2 = "0.6.2"
+objc2 = "0.6.5"
+objc2-app-kit = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "NSPasteboard",
+  "NSPasteboardItem",
+  "NSRunningApplication",
+  "NSWorkspace",
+] }
+objc2-av-foundation = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "block2",
+  "AVCaptureDevice",
+  "AVMediaFormat",
+] }
+objc2-foundation = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "NSArray",
+  "NSData",
+  "NSEnumerator",
+  "NSError",
+  "NSString",
+  "NSURL",
+] }
+objc2-service-management = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "objc2",
+  "objc2-foundation",
+  "SMAppService",
+] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.61.2", features = [
+  "Win32_Foundation",
+  "Win32_Globalization",
+  "Win32_System_DataExchange",
+  "Win32_System_LibraryLoader",
+  "Win32_System_Memory",
+  "Win32_System_Ole",
+  "Win32_System_ProcessStatus",
+  "Win32_System_Registry",
+  "Win32_System_Threading",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
+[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+arboard = { version = "3.7.0", default-features = false }
+x11rb = { version = "0.14.0", features = ["xinput", "xtest"] }
+
+[lints]
+workspace = true

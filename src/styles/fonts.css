@@ -1,0 +1,19 @@
+/* Geist Sans and Geist Mono are loaded from @fontsource-variable (see load.ts). */
+@font-face {
+  font-family: "Redaction 35";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/redaction-35-regular.woff2") format("woff2");
+}
+
+/*
+ * Unlayered on purpose: next/font used to set these on <html>. Keeping them
+ * outside @layer lets them win over the self-referencing `@theme inline`
+ * declarations in globals.css.
+ */
+html {
+  --font-geist-sans: "Geist Variable";
+  --font-geist-mono: "Geist Mono Variable";
+  --font-redaction: "Redaction 35";
+}
