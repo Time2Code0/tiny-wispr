@@ -31,6 +31,8 @@ pub enum ModelsError {
     UnexpectedFile { file: String },
     #[error("Download cancelled")]
     Cancelled,
+    #[error("The file is larger than expected, so it wasn't downloaded")]
+    TooLarge { limit: u64 },
     #[error("This isn't a {expected} file")]
     WrongFormat { expected: &'static str },
     #[error("{file} is already in your models")]

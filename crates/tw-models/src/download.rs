@@ -157,6 +157,87 @@ impl Downloader {
         result
     }
 
+    /// Fetches `url` into memory, one request recorded in the request log.
+    /// For small files that aren't models: the update manifest and the
+    /// update archive. Fails with `TooLarge` once more than `limit` bytes
+    /// arrive, or before reading when the server announces more.
+    ///
+    /// `on_progress` gets the bytes received so far and the announced total.
+    pub fn get(
+        &self,
+        url: &str,
+        limit: u64,
+        on_progress: &mut dyn FnMut(u64, Option<u64>),
+    ) -> Result<Vec<u8>> {
+        if self.offline {
+            return Err(ModelsError::Offline);
+        }
+        let started = now();
+        let mut body = Vec::new();
+        let result = self.get_into(url, limit, &mut body, on_progress);
+        if let Some(log) = &self.log {
+            log(&RequestRecord {
+                url: url.to_owned(),
+                bytes: body.len() as u64,
+                started,
+                finished: now(),
+                outcome: match &result {
+                    Ok(()) => RequestOutcome::Completed,
+                    Err(e) => RequestOutcome::Failed {
+                        message: e.to_string(),
+                    },
+                },
+            });
+        }
+        result.map(|()| body)
+    }
+
+    fn get_into(
+        &self,
+        url: &str,
+        limit: u64,
+        body: &mut Vec<u8>,
+        on_progress: &mut dyn FnMut(u64, Option<u64>),
+    ) -> Result<()> {
+        let response = self
+            .agent
+            .get(url)
+            .call()
+            .map_err(|e| ModelsError::Network(Box::new(e)))?;
+        let status = response.status().as_u16();
+        if status != 200 {
+            return Err(ModelsError::Http { status });
+        }
+        let total = content_length(response.headers());
+        if total.is_some_and(|total| total > limit) {
+            return Err(ModelsError::TooLarge { limit });
+        }
+        let mut reader = response.into_body().into_reader();
+        let mut buf = vec![0; CHUNK];
+        let mut last: Option<Instant> = None;
+        loop {
+            let n = match reader.read(&mut buf) {
+                Ok(0) => break,
+                Ok(n) => n,
+                Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
+                Err(e) => return Err(ModelsError::Network(Box::new(e))),
+            };
+            if body.len() as u64 + n as u64 > limit {
+                return Err(ModelsError::TooLarge { limit });
+            }
+            body.extend_from_slice(&buf[..n]);
+            if last.is_none_or(|last| last.elapsed() >= PROGRESS_INTERVAL) {
+                last = Some(Instant::now());
+                on_progress(body.len() as u64, total);
+            }
+        }
+        if total.is_some_and(|total| total != body.len() as u64) {
+            return Err(ModelsError::Network("the connection closed early".into()));
+        }
+        on_progress(body.len() as u64, total);
+        Ok(())
+    }
+
     fn fetch(
         &self,
         inventory: &Inventory,

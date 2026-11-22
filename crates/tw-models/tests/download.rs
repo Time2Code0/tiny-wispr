@@ -593,3 +593,72 @@ fn refuses_a_download_that_cannot_fit_before_connecting() {
             .exists()
     );
 }
+
+#[test]
+fn get_fetches_into_memory_and_logs_one_request() {
+    let body = data(3_000);
+    let server = Server::start(vec![
+        ("/latest.json", Route::Redirect("/asset")),
+        ("/asset", file(&body, false)),
+    ]);
+    let (downloader, records) = logged();
+    let mut progress = Vec::new();
+
+    let fetched = downloader
+        .get(
+            &server.url("/latest.json"),
+            10_000,
+            &mut |received, total| {
+                progress.push((received, total));
+            },
+        )
+        .unwrap();
+
+    assert_eq!(fetched, *body);
+    assert_eq!(progress.last(), Some(&(3_000, Some(3_000))));
+    assert_eq!(outcomes(&records), vec![(RequestOutcome::Completed, 3_000)]);
+    assert_eq!(records.lock().unwrap()[0].url, server.url("/latest.json"));
+}
+
+#[test]
+fn get_refuses_a_body_over_the_limit() {
+    let body = data(3_000);
+    let server = Server::start(vec![("/big", file(&body, false))]);
+    let (downloader, records) = logged();
+
+    let error = downloader
+        .get(&server.url("/big"), 1_000, &mut |_, _| ())
+        .unwrap_err();
+
+    assert!(
+        matches!(error, ModelsError::TooLarge { limit: 1_000 }),
+        "{error:?}"
+    );
+    let logged = outcomes(&records);
+    assert!(
+        matches!(logged[..], [(RequestOutcome::Failed { .. }, 0)]),
+        "{logged:?}"
+    );
+}
+
+#[test]
+fn get_reports_http_errors_and_offline() {
+    let server = Server::start(vec![]);
+    let (downloader, records) = logged();
+
+    let error = downloader
+        .get(&server.url("/missing"), 1_000, &mut |_, _| ())
+        .unwrap_err();
+    assert!(
+        matches!(error, ModelsError::Http { status: 404 }),
+        "{error:?}"
+    );
+    assert_eq!(records.lock().unwrap().len(), 1);
+
+    let error = Downloader::new()
+        .offline(true)
+        .get(&server.url("/missing"), 1_000, &mut |_, _| ())
+        .unwrap_err();
+    assert!(matches!(error, ModelsError::Offline), "{error:?}");
+    assert_eq!(server.seen().len(), 1, "offline makes no request");
+}
