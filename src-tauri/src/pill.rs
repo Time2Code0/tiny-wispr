@@ -163,7 +163,7 @@ fn track(
     let height = f64::from(size.height) / scale;
     let visible = window.is_visible().unwrap_or(false);
     let ignore = !(visible && app.state::<AppState>().pill.hit(x, y));
-    if *ignoring != Some(ignore) {
+    if *ignoring != Some(ignore) && can_set_click_through(visible) {
         match window.set_ignore_cursor_events(ignore) {
             Ok(()) => *ignoring = Some(ignore),
             Err(err) => tracing::warn!(%err, "could not set pill click-through"),
@@ -174,6 +174,12 @@ fn track(
         && y > -NEAR_MARGIN
         && x < width + NEAR_MARGIN
         && y < height + NEAR_MARGIN
+}
+
+/// On Linux a window GTK hasn't shown yet has no GDK window, and tao panics
+/// when asked to make it click-through. A hidden pill gets no clicks anyway.
+pub fn can_set_click_through(visible: bool) -> bool {
+    visible || !cfg!(target_os = "linux")
 }
 
 fn monitor_identity(monitor: &Monitor) -> (i32, i32, u32, u32) {

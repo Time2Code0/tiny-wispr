@@ -93,7 +93,9 @@ pub fn create_pill(app: &AppHandle) -> tauri::Result<WebviewWindow> {
         .visible(false)
         .build()?;
     pill::configure(&window);
-    window.set_ignore_cursor_events(true)?;
+    if pill::can_set_click_through(false) {
+        window.set_ignore_cursor_events(true)?;
+    }
     let monitor = match app.cursor_position() {
         Ok(cursor) => app.monitor_from_point(cursor.x, cursor.y)?,
         Err(_) => None,
