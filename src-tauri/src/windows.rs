@@ -197,6 +197,7 @@ pub fn open_app(app: &AppHandle) -> tauri::Result<()> {
 
 /// Clicking the Dock icon. The pill counts as a visible window to macOS, so
 /// look at the two real windows instead.
+#[cfg(target_os = "macos")]
 pub fn reopen(app: &AppHandle) {
     let visible = [MAIN, ONBOARDING].iter().any(|label| {
         app.get_webview_window(label)
