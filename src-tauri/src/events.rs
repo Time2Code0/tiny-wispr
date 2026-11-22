@@ -21,6 +21,8 @@ pub const HISTORY_CHANGED: &str = "history:changed";
 pub const HOTKEY_CAPTURED: &str = "hotkey:captured";
 /// `ListenerStatus`
 pub const LISTENER_STATUS: &str = "listener:status";
+/// `UpdateState`
+pub const UPDATES_STATE: &str = "updates:state";
 /// `Navigate`, sent to the main window only.
 pub const WINDOW_NAVIGATE: &str = "window:navigate";
 

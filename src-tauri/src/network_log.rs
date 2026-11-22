@@ -1,4 +1,4 @@
-//! Every network request the app makes (only model downloads), kept in
+//! Every network request the app makes (model downloads and update checks), kept in
 //! `network-log.json` so the Privacy page can show them.
 
 use serde::{Deserialize, Serialize};

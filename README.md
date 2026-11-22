@@ -2,7 +2,7 @@
 
 Tiny Wispr is a small dictation app for macOS, Windows and Linux. Hold a key, speak, and release: your words are transcribed on your computer with Whisper and pasted into whatever app you're using.
 
-Nothing you say leaves your computer. There's no account and no telemetry. The only network requests the app makes are the model downloads you ask for. An optional local language model can tidy up what you said.
+Nothing you say leaves your computer. There's no account and no telemetry. The only network requests the app makes are the model downloads you ask for and update checks. An optional local language model can tidy up what you said.
 
 ## Prerequisites
 

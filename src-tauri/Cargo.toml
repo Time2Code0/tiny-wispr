@@ -25,6 +25,7 @@ sysinfo = { version = "0.40", default-features = false, features = ["system"] }
 tauri = { version = "2.12", features = ["tray-icon", "macos-private-api"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-single-instance = "2"
+tauri-plugin-updater = { version = "2.14", default-features = false, features = ["rustls-tls", "zip"] }
 thiserror.workspace = true
 tracing.workspace = true
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

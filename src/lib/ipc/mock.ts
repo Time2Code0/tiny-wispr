@@ -32,6 +32,7 @@ import type {
   SettingsPatch,
   Snippet,
   Stats,
+  UpdateState,
 } from "./types";
 
 import {
@@ -41,11 +42,13 @@ import {
   hotkeyKeyCount,
 } from "@/lib/hotkey";
 
+import { version } from "../../../package.json";
 import { applyPatch, defaultSettings } from "./defaults";
 import { IpcError } from "./errors";
 import { createMockFileJobs } from "./mock-files";
 import { validateHotkey } from "./mock-hotkey";
 import { approximatePolish } from "./mock-text";
+import { createMockUpdates, type MockUpdateOutcome } from "./mock-updates";
 
 /**
  * In-memory backend for `pnpm dev` in a plain browser. Each window (tab) has
@@ -123,6 +126,10 @@ export interface MockControls {
   settings: (patch: SettingsPatch) => void;
   /** Current mock state, for inspection. */
   readonly state: unknown;
+  /** Jumps the updater to a state, e.g. `"ready"`, with a sample release. */
+  update: (state: UpdateState["state"]) => void;
+  /** What the next update check finds, or which step fails. */
+  updateOutcome: (outcome: MockUpdateOutcome) => void;
 }
 
 declare global {
@@ -1122,6 +1129,18 @@ export function createMockBackend(): Backend {
     save: (entry) => addHistory(entry, 0),
   });
 
+  const updates = createMockUpdates({
+    busy: () =>
+      state.dictation.phase === "listening" ||
+      state.dictation.phase === "processing" ||
+      files.current() !== null,
+    currentVersion: version,
+    emit: (update) => emit("updates:state", update),
+    log: (request) => state.networkLog.push(request),
+    offline: () => state.settings.offline,
+    restart: () => window.location.reload(),
+  });
+
   const handlers: Handlers = {
     cancel_dictation: () => {
       if (state.dictation.phase === "listening") {
@@ -1156,6 +1175,10 @@ export function createMockBackend(): Backend {
     },
     cancel_file_transcription: ({ jobId }) => {
       files.cancel(jobId);
+      return null;
+    },
+    check_for_updates: () => {
+      updates.check();
       return null;
     },
     clear_history: () => {
@@ -1216,6 +1239,10 @@ export function createMockBackend(): Backend {
       startDownload(model);
       return null;
     },
+    download_update: () => {
+      updates.download();
+      return null;
+    },
     get_dictation_state: () => state.dictation,
     get_file_transcription: () => files.current(),
     get_hardware_info: () => ({
@@ -1234,6 +1261,7 @@ export function createMockBackend(): Backend {
     }),
     get_settings: () => state.settings,
     get_stats: () => computeStats(counted, Date.now()),
+    get_update_state: () => updates.state(),
     hide_pill_for: ({ minutes }) =>
       setSettings(
         applyPatch(state.settings, {
@@ -1267,6 +1295,10 @@ export function createMockBackend(): Backend {
       state.models = [...state.models, model];
       emit("models:changed", null);
       return model;
+    },
+    install_update: () => {
+      updates.install();
+      return null;
     },
     list_dictionary: () => state.dictionary,
     list_history: ({ cursor, query }) => {
@@ -1493,6 +1525,12 @@ export function createMockBackend(): Backend {
     },
     get state() {
       return state;
+    },
+    update(target) {
+      updates.jump(target);
+    },
+    updateOutcome(outcome) {
+      updates.outcome(outcome);
     },
   };
   window.__tinyWisprMock = controls;

@@ -14,6 +14,7 @@ For people who want to install the app and dictate.
 - [Models](user/models.md): voice and language models, which to pick, importing your own
 - [Transcribing audio files](user/transcribe-files.md)
 - [Settings](user/settings.md): every option, page by page
+- [Updating](user/updating.md): checking for, downloading and installing a new version
 - [Privacy](user/privacy.md): what stays on your computer and the only network requests the app makes
 - [Troubleshooting](user/troubleshooting.md)
 
@@ -29,6 +30,7 @@ For developers and coding agents working on the code. Read [Architecture](intern
 - [IPC](internals/ipc.md): commands, events, errors, and how to add one
 - [Frontend](internals/frontend.md): windows, routing, hooks, the mock backend, UI conventions
 - [Data and persistence](internals/data-and-persistence.md): what is stored where, and how
+- [Updates](internals/updates.md): the in-app updater, the update manifest and how an update is verified
 
 ## Operations
 

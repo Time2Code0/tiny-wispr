@@ -14,6 +14,7 @@ use crate::network_log::NetworkRequest;
 use crate::pill::Pill;
 use crate::settings_store::SettingsStore;
 use crate::store::{HistoryFile, JsonStore};
+use crate::updates::Updates;
 use crate::windows::now_ms;
 
 /// Locks `mutex`, recovering the data if another thread panicked with it held.
@@ -95,4 +96,5 @@ pub struct AppState {
     pub transcribers: Arc<WhisperModels>,
     pub polisher: Arc<LlmPolish>,
     pub pill: Arc<Pill>,
+    pub updates: Arc<Updates>,
 }

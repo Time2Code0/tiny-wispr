@@ -180,6 +180,15 @@ export const hidePillFor = (minutes: number) =>
   backend.invoke("hide_pill_for", { minutes });
 export const setPillHitRegions = (rects: PillRect[]) =>
   backend.invoke("set_pill_hit_regions", { rects });
+// updates
+export const getUpdateState = () =>
+  backend.invoke("get_update_state", undefined);
+export const checkForUpdates = () =>
+  backend.invoke("check_for_updates", undefined);
+export const downloadUpdate = () =>
+  backend.invoke("download_update", undefined);
+export const installUpdate = () => backend.invoke("install_update", undefined);
+
 /** Every request the app has made, oldest first. */
 export const listNetworkLog = () =>
   backend.invoke("list_network_log", undefined);
@@ -216,5 +225,7 @@ export const onHotkeyCaptured = (handler: Handler<"hotkey:captured">) =>
   on("hotkey:captured", handler);
 export const onListenerStatus = (handler: Handler<"listener:status">) =>
   on("listener:status", handler);
+export const onUpdateState = (handler: Handler<"updates:state">) =>
+  on("updates:state", handler);
 export const onNavigate = (handler: Handler<"window:navigate">) =>
   on("window:navigate", handler);

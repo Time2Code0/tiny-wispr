@@ -1,6 +1,6 @@
 # Models and the language model worker
 
-Two kinds of model run on the device. Voice models (Whisper) are in `tw-stt`; language models (GGUF through llama.cpp) run in a separate process. Files and downloads are the job of `tw-models`, which is **the only crate that touches the network**.
+Two kinds of model run on the device. Voice models (Whisper) are in `tw-stt`; language models (GGUF through llama.cpp) run in a separate process. Files and downloads are the job of `tw-models`, which is **the only crate that touches the network**. Its `Downloader` also fetches the updater's manifest and archive ([Updates](updates.md)).
 
 ## The catalog
 
@@ -50,7 +50,8 @@ In debug builds `TINY_WISPR_MODELS_DIR` points the root elsewhere; that's how th
 - Checks free space first, keeping `SPACE_MARGIN` (100 MB) spare.
 - Progress is throttled to once per 100 ms, then exactly one of `Done`, `Paused` (cancelled, partial kept) or `Failed`.
 - A hash mismatch deletes the partial file.
-- `offline(true)` refuses every request with `ModelsError::Offline`. The app sets it from `settings.offline`.
+- `offline(true)` refuses every request with `ModelsError::Offline`. The app checks `settings.offline` itself before it starts a download or an update check.
+- `get(url, limit, on_progress)` fetches a small file into memory with one logged request, failing with `TooLarge` past `limit`. The updater uses it; models always go to disk through `download`.
 - Every request, finished or not, goes to the request log closure given with `with_request_log`.
 
 `src-tauri/src/models.rs::Models` runs downloads on worker threads and tracks them in a map of `Transfer`s. `list_models` returns the catalog + disk + running transfers, with `recommended` set. It emits `models:progress` while a download runs and `models:changed` when the set of files changes.

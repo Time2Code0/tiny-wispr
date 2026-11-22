@@ -127,6 +127,8 @@ export interface Languages {
 }
 
 export interface Settings {
+  /** Look for a new version once a day. Off by default. */
+  checkForUpdates: boolean;
   cleanupLevel: CleanupLevel;
   dictationMode: DictationMode;
   historyRetention: HistoryRetention;
@@ -136,7 +138,7 @@ export interface Settings {
   llmModel: string | null;
   /** Input device id; `null` follows the system default. */
   microphone: string | null;
-  /** "Stay offline": no network use, so `download_model` is refused. */
+  /** "Stay offline": no network use, so downloads and update checks are refused. */
   offline: boolean;
   onboardingCompleted: boolean;
   onboardingStep: OnboardingStep;
@@ -356,7 +358,7 @@ export type ErrorKind =
   | "microphoneBusy"
   /** `start_mic_test`: microphone access is turned off. */
   | "permissionDenied"
-  /** `download_model`: "Stay offline" is on. */
+  /** `download_model`, `check_for_updates`, `download_update`: "Stay offline" is on. */
   | "offline"
   | "io"
   | "internal";
@@ -405,7 +407,7 @@ export interface ListenerStatus {
 
 export type RequestResult = "completed" | "cancelled" | "restarted" | "failed";
 
-/** One request the app made (model downloads only). */
+/** One request the app made: a model download or an update check. */
 export interface NetworkRequest {
   bytes: number;
   finishedAt: number;
@@ -466,6 +468,36 @@ export interface FileProgress {
   wordCount: number | null;
 }
 
+// ── updates (tw_core::updates) ───────────────────────────────────────────
+
+/** A newer version on the update server. */
+export interface Release {
+  /** What changed, as Markdown. */
+  notes: string | null;
+  publishedAt: Millis | null;
+  version: string;
+}
+
+/** Payload of `updates:state` and result of `get_update_state`. */
+export type UpdateState =
+  /** Nothing checked since launch. */
+  | { state: "idle" }
+  | { state: "checking" }
+  | { checkedAt: Millis; state: "upToDate" }
+  | { release: Release; state: "available" }
+  | {
+      received: number;
+      release: Release;
+      state: "downloading";
+      total: number | null;
+    }
+  /** Downloaded and verified. Installed when the app restarts. */
+  | { release: Release; state: "ready" }
+  /** Replacing the app, then restarting. */
+  | { release: Release; state: "installing" }
+  /** `release` is set when a download failed, so it can be retried. */
+  | { message: string; release: Release | null; state: "failed" };
+
 // ── command and event maps ───────────────────────────────────────────────
 
 /** Every command: its arguments (camelCase, as Tauri expects) and result. */
@@ -473,6 +505,8 @@ export interface Commands {
   cancel_dictation: { args: undefined; result: null };
   cancel_download: { args: { id: string }; result: null };
   cancel_file_transcription: { args: { jobId: string }; result: null };
+  /** Starts a check; the result arrives as `updates:state`. */
+  check_for_updates: { args: undefined; result: null };
   clear_history: { args: undefined; result: null };
   complete_onboarding: { args: undefined; result: Settings };
   copy_last_transcript: { args: undefined; result: null };
@@ -481,6 +515,8 @@ export interface Commands {
   delete_model: { args: { id: string }; result: null };
   delete_snippet: { args: { id: string }; result: null };
   download_model: { args: { id: string }; result: null };
+  /** Downloads the release the last check found. */
+  download_update: { args: undefined; result: null };
   get_dictation_state: { args: undefined; result: DictationState };
   /** The running file job's latest progress; null when none runs. */
   get_file_transcription: { args: undefined; result: FileProgress | null };
@@ -490,11 +526,14 @@ export interface Commands {
   get_recommendation: { args: undefined; result: Recommendation };
   get_settings: { args: undefined; result: Settings };
   get_stats: { args: undefined; result: Stats };
+  get_update_state: { args: undefined; result: UpdateState };
   hide_pill_for: { args: { minutes: number }; result: Settings };
   import_model: {
     args: { kind: ModelKind; path: string };
     result: ModelInfo;
   };
+  /** Installs the downloaded update and restarts the app. */
+  install_update: { args: undefined; result: null };
   list_dictionary: { args: undefined; result: DictionaryEntry[] };
   list_history: {
     args: { cursor: string | null; query: string | null };
@@ -561,6 +600,7 @@ export interface Events {
   "models:progress": ModelProgress;
   "permissions:changed": Permissions;
   "settings:changed": Settings;
+  "updates:state": UpdateState;
   /** Main window only. */
   "window:navigate": Navigate;
 }

@@ -9,13 +9,18 @@ Tiny Wispr is built so that nothing you say, and nothing you write, ever leaves 
 
 ## The only network requests
 
-The app makes a request when you ask it to download a model, and at no other time. Downloads go to Hugging Face over HTTPS, to an address listed in the model's catalog entry. The app doesn't check for updates and doesn't phone home.
+The app goes online for two things, and at no other time:
+
+- **Model downloads you start.** They go to Hugging Face over HTTPS, to an address listed in the model's catalog entry.
+- **Update checks.** When you click **Check for updates** under Settings → About, or once a day if you turned on **Check for updates automatically** (it's off unless you do). The check downloads a small file, `latest.json`, from the app's GitHub releases. It sends nothing about you: no ID, no settings, no usage. GitHub sees what any web request shows, your IP address and the app's version. An update is only downloaded when you click **Download**.
+
+The app doesn't phone home in any other way.
 
 Don't take our word for it:
 
 - Settings → Privacy → **Network activity** lists every request the app has made: the full address, how much was transferred, when, and whether it finished, was cancelled or failed.
-- **Stay offline** in the same place makes the app refuse every network request.
-- The source is open, and all network code is in one place: the `tw-models` crate.
+- **Stay offline** in the same place makes the app refuse every network request, update checks included.
+- The source is open, and every request goes through one place: the downloader in the `tw-models` crate.
 
 ## Where your data lives
 

@@ -18,6 +18,7 @@ mod sound;
 mod state;
 mod store;
 mod tray;
+mod updates;
 mod windows;
 
 use std::path::PathBuf;
@@ -42,6 +43,7 @@ use crate::models::Models;
 use crate::pill::Pill;
 use crate::sink::AppSink;
 use crate::state::Data;
+use crate::updates::Updates;
 
 #[cfg(debug_assertions)]
 type Smoke = dictation::smoke::Smoke;
@@ -85,6 +87,10 @@ fn setup(app: &mut App) -> anyhow::Result<()> {
     let downloader =
         Downloader::new().with_request_log(move |record| network_log::record(&log_data, record));
     let models = Arc::new(Models::new(inventory.clone(), downloader));
+    let log_data = Arc::clone(&data);
+    let updates = Arc::new(Updates::new(
+        Downloader::new().with_request_log(move |record| network_log::record(&log_data, record)),
+    ));
     let polisher = Arc::new(LlmPolish::new(inventory.clone()));
     let transcribers = Arc::new(WhisperModels::new(inventory));
     transcribers.spawn_idle_check();
@@ -140,6 +146,7 @@ fn setup(app: &mut App) -> anyhow::Result<()> {
         transcribers,
         polisher,
         pill: Arc::new(Pill::default()),
+        updates: Arc::clone(&updates),
     });
 
     if let Err(err) = tw_os::insert::refresh_keyboard_layout() {
@@ -159,6 +166,7 @@ fn setup(app: &mut App) -> anyhow::Result<()> {
         }
         _ => windows::open_initial(&handle, &settings).context("creating windows")?,
     }
+    updates.spawn_schedule(handle.clone());
     pill::spawn_tracker(handle);
     Ok(())
 }
@@ -191,7 +199,8 @@ pub fn run() {
                 tracing::warn!(%err, "could not show the main window");
             }
         }))
-        .plugin(tauri_plugin_dialog::init());
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build());
     #[cfg(target_os = "macos")]
     let builder = builder.menu(app_menu::build);
     let app = builder

@@ -55,12 +55,15 @@ How your words get into the app:
 - **Permissions**: shows each permission's status, with a button to grant it or open System Settings.
 - **Where your data lives**: the folder that holds everything the app stores.
 - **Network activity**: every network request the app has ever made, with the address, size, time and result. See [Privacy](privacy.md).
-- **Stay offline**: refuse every network request. Models can't be downloaded until you turn it off.
+- **Stay offline**: refuse every network request. Models can't be downloaded, and updates can't be checked, until you turn it off.
 
 ## About
 
-The version, and the open-source projects Tiny Wispr is built on.
+- The version.
+- **Updates**: **Check for updates** asks GitHub whether a newer version is out. When there is one, the page shows what's new and offers **Download**, then **Restart to update**. See [Updating](updating.md).
+- **Check for updates automatically**: off by default. When on, the app checks once a day while it's open (the first check a minute after it starts). It never downloads an update on its own.
+- The open-source projects Tiny Wispr is built on.
 
 ## Menu bar icon
 
-Open Tiny Wispr, a microphone submenu, Paste last transcript, Settings, and Quit. A template icon follows the menu bar's light and dark look.
+Open Tiny Wispr, a microphone submenu, Paste last transcript, Settings, and Quit. Once an update is downloaded, **Restart to update to <version>** appears at the top. A template icon follows the menu bar's light and dark look.

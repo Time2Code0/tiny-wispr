@@ -5,6 +5,7 @@ import { defaultShortcuts } from "@/lib/hotkey";
 /** Mirrors `impl Default for Settings` in `tw_core::settings`. */
 export function defaultSettings(platform: Platform): Settings {
   return {
+    checkForUpdates: false,
     cleanupLevel: "light",
     dictationMode: "hold",
     historyRetention: "forever",

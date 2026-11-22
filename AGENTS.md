@@ -1,6 +1,6 @@
 # Tiny Wispr
 
-A local, private dictation app: hold a key, speak, release, and the text is transcribed on this device and pasted into the focused app. No account, no cloud, no telemetry. The only network requests are model downloads the user asked for.
+A local, private dictation app: hold a key, speak, release, and the text is transcribed on this device and pasted into the focused app. No account, no cloud, no telemetry. The only network requests are model downloads the user asked for and update checks (when the user clicks "Check for updates", or once a day if they turned that on).
 
 Tauri v2 app. The Rust workspace and the Vite + React frontend both live at the repo root.
 
@@ -33,6 +33,7 @@ Tests never open the microphone, create an event tap or prompt for a permission.
 - `scripts/make-speech-fixture.sh "<text>" <out.wav>` makes a 16 kHz WAV with `say` and `ffmpeg`.
 - `TINY_WISPR_TEST_MODELS=<dir>` turns on the tests that need real models (`<dir>/whisper/ggml-tiny.en.bin`, `ggml-base.bin`, and the catalog's GGUF files in `<dir>/llm/`). Without it they skip.
 - `TINY_WISPR_NETWORK_TESTS=1` turns on the catalog URL check and a real resumed download.
+- `TINY_WISPR_UPDATE_URL=<latest.json URL>` points the updater at another manifest, such as a prerelease's, to test an update.
 - Debug builds have a scripted run of one dictation through the real runtime: `TINY_WISPR_SMOKE=<wav> TINY_WISPR_SMOKE_OUT=<txt> TINY_WISPR_MODELS_DIR=<dir> TINY_WISPR_DATA_DIR=<dir> target/debug/tiny-wispr`. It writes the inserted text to the out file and exits with 0. Put `{"llmModel":"<catalog id>"}` in `<data dir>/settings.json` to include polish.
 - `cargo run -p tw-llm --example polish_eval` scores a language model on 26 dictated transcripts.
 

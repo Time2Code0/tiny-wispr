@@ -6,7 +6,7 @@ Tiny Wispr is a Tauri v2 app: a Rust backend and a React frontend in three small
 
 These decide where code goes. Most design questions are answered by one of them.
 
-1. **Everything runs on this device.** The only network code is model downloads, in `tw-models`. Nothing else may open a socket. Every request is logged for the user ([Data and persistence](data-and-persistence.md#network-log)).
+1. **Everything runs on this device.** The only network code is the downloader in `tw-models`: model downloads, and update checks and downloads ([Updates](updates.md)). Nothing else may open a socket. Every request is logged for the user ([Data and persistence](data-and-persistence.md#network-log)).
 2. **Pure logic is separate from the OS.** `tw-core` has no native dependencies, so everything that can be decided without a microphone, a window or a key tap is decided there and unit-tested.
 3. **The dictation flow is a reducer.** `step(&State, Event, now) -> (State, Vec<Effect>)` in `tw-core`, driven by a runtime that performs the effects. See [Dictation runtime](dictation-runtime.md).
 4. **The OS sits behind traits.** The runtime depends on `AudioSource`, `Desktop`, `Transcribers`, `Polisher` and `Sink`, so the whole thing can be driven by fakes in tests and a scripted file in the smoke run.
@@ -69,7 +69,8 @@ Dependencies point one way:
 | `tray.rs`, `app_menu.rs` | Menu bar icon and menu; the macOS app menu's "Settings…" |
 | `files.rs` | Audio file transcription jobs |
 | `models.rs` | Download orchestration over `tw-models` |
-| `network_log.rs` | Persists the download requests |
+| `network_log.rs` | Persists every request: model downloads and the updater's |
+| `updates.rs` | The in-app updater: check, download, install and restart, and the daily check |
 | `sink.rs`, `sound.rs` | `Sink` implementation (events to windows); start and stop sounds |
 
 ## The windows

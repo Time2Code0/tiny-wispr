@@ -18,6 +18,7 @@ const OPEN: &str = "open";
 const MIC_DEFAULT: &str = "mic-default";
 const PASTE_LAST: &str = "paste-last";
 const HIDE_PILL: &str = "hide-pill";
+const RESTART_TO_UPDATE: &str = "restart-to-update";
 /// Also the id of the app menu's Settings item, so this handler covers both.
 pub const SETTINGS: &str = "settings";
 const QUIT: &str = "quit";
@@ -95,6 +96,13 @@ fn menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let selected = app
         .try_state::<AppState>()
         .and_then(|state| state.data.settings.get().microphone);
+    let ready = app.try_state::<AppState>().and_then(|state| {
+        state
+            .updates
+            .state()
+            .installable()
+            .map(|release| release.version.clone())
+    });
     let microphones = tw_audio::list_input_devices().unwrap_or_else(|err| {
         tracing::warn!(%err, "could not list microphones");
         Vec::new()
@@ -122,7 +130,7 @@ fn menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .map(|item| item as &dyn tauri::menu::IsMenuItem<Wry>)
         .collect();
     let microphone = Submenu::with_items(app, "Microphone", true, &mic_refs)?;
-    Menu::with_items(
+    let menu = Menu::with_items(
         app,
         &[
             &MenuItem::with_id(app, OPEN, "Open Tiny Wispr", true, None::<&str>)?,
@@ -140,7 +148,18 @@ fn menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &PredefinedMenuItem::separator(app)?,
             &MenuItem::with_id(app, QUIT, "Quit Tiny Wispr", true, None::<&str>)?,
         ],
-    )
+    )?;
+    if let Some(version) = ready {
+        let label = format!("Restart to update to {version}");
+        menu.insert_items(
+            &[
+                &MenuItem::with_id(app, RESTART_TO_UPDATE, label, true, None::<&str>)?,
+                &PredefinedMenuItem::separator(app)?,
+            ],
+            0,
+        )?;
+    }
+    Ok(menu)
 }
 
 /// The tooltip says what dictation is doing.
@@ -177,6 +196,18 @@ fn on_menu_event(app: &AppHandle, event: MenuEvent) {
                 tracing::warn!(%err, "could not hide the pill");
             }
             Ok(())
+        }
+        RESTART_TO_UPDATE => {
+            match app
+                .try_state::<AppState>()
+                .map(|state| state.updates.install(app))
+            {
+                Some(Err(err)) => {
+                    tracing::warn!(%err, "could not restart to update");
+                    windows::show_main(app, Some(MainRoute::Settings)).map(drop)
+                }
+                _ => Ok(()),
+            }
         }
         QUIT => {
             app.exit(0);

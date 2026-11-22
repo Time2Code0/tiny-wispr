@@ -165,7 +165,7 @@ export function PrivacySettings() {
         />
         <p className="text-pretty text-foreground text-sm">
           Tiny Wispr never sends your voice or text anywhere. The only network
-          requests it makes are the model downloads you start.
+          requests it makes are the model downloads you start and update checks.
         </p>
       </div>
 
@@ -230,7 +230,7 @@ export function PrivacySettings() {
         <SettingGroup>
           <SwitchRow
             checked={settings.offline}
-            description="Block all network use. Model downloads won't start until you turn this off."
+            description="Block all network use. Model downloads and update checks won't start until you turn this off."
             label="Stay offline"
             onCheckedChange={setOffline}
           />

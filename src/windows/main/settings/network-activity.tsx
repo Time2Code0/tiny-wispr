@@ -7,7 +7,7 @@ import { listNetworkLog } from "@/lib/ipc";
 import { Section, SettingGroup } from "../page";
 
 const SHOWN = 50;
-const LOG_EVENTS = ["models:changed"] as const;
+const LOG_EVENTS = ["models:changed", "updates:state"] as const;
 
 const WHEN = new Intl.DateTimeFormat(undefined, {
   day: "numeric",

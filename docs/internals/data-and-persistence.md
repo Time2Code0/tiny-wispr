@@ -12,7 +12,7 @@ Everything the app stores is a plain file in one folder, the OS app data directo
 | `history.json` | `HistoryStore` | `HistoryFile` | Entries and the stats ledger, with a `version` |
 | `dictionary.json` | `Vec<DictionaryEntry>` | `JsonStore` | |
 | `snippets.json` | `Vec<Snippet>` | `JsonStore` | |
-| `network-log.json` | `Vec<NetworkRequest>` | `JsonStore` | Every download request ever made |
+| `network-log.json` | `Vec<NetworkRequest>` | `JsonStore` | Every request ever made: model downloads and update checks |
 | `models/whisper/`, `models/llm/` | | `Inventory` | Model files, `*.partial` for unfinished downloads, `*.importing` while copying |
 
 Debug builds honour `TINY_WISPR_DATA_DIR` and `TINY_WISPR_MODELS_DIR` to point elsewhere, so tests and the smoke run leave the real data alone. Release builds ignore them.
@@ -48,7 +48,7 @@ Take the minimum from the lock: `read(|v| …)` avoids cloning a big value, and 
 
 ## Network log
 
-`network_log.rs` receives a `RequestRecord` from `tw-models` for every download request and appends a `NetworkRequest { url, bytes, started_at, finished_at, result, message }` (`completed`, `cancelled`, `restarted`, `failed`). The Privacy page shows it, oldest first. This is the app's proof that its only network traffic is model downloads, so **any new network use must go through `tw-models` and be logged here.**
+`network_log.rs` receives a `RequestRecord` from `tw-models` for every request (the model downloader and the updater's downloader both log through it) and appends a `NetworkRequest { url, bytes, started_at, finished_at, result, message }` (`completed`, `cancelled`, `restarted`, `failed`). The Privacy page shows it, oldest first. This is the app's proof that its only network traffic is model downloads and update checks, so **any new network use must go through `tw-models` and be logged here.**
 
 ## Not stored
 

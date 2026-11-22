@@ -45,7 +45,7 @@ Select **Download** on a row. You see progress, and can pause and resume or canc
 
 The "On this computer" list at the bottom of the page shows the space your models take, and lets you delete them.
 
-**Stay offline** under Settings → Privacy blocks all downloads, in case you want a hard guarantee.
+**Stay offline** under Settings → Privacy blocks all downloads and update checks, in case you want a hard guarantee.
 
 ## Importing your own
 

@@ -93,8 +93,12 @@ pub struct Settings {
     pub show_in_dock: bool,
     pub theme: Theme,
     pub history_retention: HistoryRetention,
-    /// "Stay offline": no network use at all, so model downloads are refused.
+    /// "Stay offline": no network use at all, so model downloads and update
+    /// checks are refused.
     pub offline: bool,
+    /// Look for a new version once a day. Off unless the user turns it on;
+    /// "Check for updates" works either way.
+    pub check_for_updates: bool,
     pub onboarding_completed: bool,
     /// Where onboarding resumes if the app quits mid-way.
     pub onboarding_step: OnboardingStep,
@@ -122,6 +126,7 @@ impl Default for Settings {
             theme: Theme::System,
             history_retention: HistoryRetention::Forever,
             offline: false,
+            check_for_updates: false,
             onboarding_completed: false,
             onboarding_step: OnboardingStep::Welcome,
             pill_hidden_until: None,
@@ -190,6 +195,8 @@ pub struct SettingsPatch {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub offline: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_for_updates: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub onboarding_completed: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub onboarding_step: Option<OnboardingStep>,
@@ -226,6 +233,7 @@ impl Settings {
             theme,
             history_retention,
             offline,
+            check_for_updates,
             onboarding_completed,
             onboarding_step,
             pill_hidden_until,
@@ -247,6 +255,7 @@ impl Settings {
         set(&mut self.theme, theme);
         set(&mut self.history_retention, history_retention);
         set(&mut self.offline, offline);
+        set(&mut self.check_for_updates, check_for_updates);
         set(&mut self.onboarding_completed, onboarding_completed);
         set(&mut self.onboarding_step, onboarding_step);
         set(&mut self.pill_hidden_until, pill_hidden_until);
@@ -270,6 +279,7 @@ mod tests {
         assert_eq!(s.cleanup_level, CleanupLevel::Light);
         assert!(s.show_pill_always && s.sounds && s.restore_clipboard);
         assert!(!s.onboarding_completed && !s.launch_at_login && !s.offline);
+        assert!(!s.check_for_updates, "update checks are opt-in");
         assert_eq!(s.onboarding_step, OnboardingStep::Welcome);
         assert_eq!(s.styles.email, WritingStyle::Formal);
         assert_eq!(s.shortcuts, Shortcuts::defaults(Platform::current()));

@@ -11,6 +11,7 @@ pub mod models;
 pub mod permissions;
 pub mod settings;
 pub mod text;
+pub mod updates;
 
 pub fn handler() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
     tauri::generate_handler![
@@ -61,5 +62,9 @@ pub fn handler() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static 
         app::hide_pill_for,
         app::set_pill_hit_regions,
         app::list_network_log,
+        updates::get_update_state,
+        updates::check_for_updates,
+        updates::download_update,
+        updates::install_update,
     ]
 }

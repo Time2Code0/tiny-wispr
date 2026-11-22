@@ -1,5 +1,6 @@
 import { version } from "../../../../package.json";
 import { Section } from "../page";
+import { UpdatesSection } from "./updates";
 
 const CREDITS = [
   {
@@ -32,6 +33,7 @@ export function AboutSettings() {
           Local, private dictation. No account, no cloud, no tracking.
         </p>
       </div>
+      <UpdatesSection />
       <Section title="Built on">
         <ul className="flex flex-col divide-y rounded-xl border">
           {CREDITS.map((credit) => (
