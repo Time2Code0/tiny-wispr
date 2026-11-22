@@ -10,6 +10,7 @@ import {
   prependChangelog,
   readVersions,
   releaseNotes,
+  updatePlatforms,
   updaterManifest,
   versionProblems,
   writeVersions,
@@ -159,5 +160,36 @@ describe("updater manifest", () => {
         platforms: { "darwin-aarch64": { signature: " ", url: "https://a" } },
       })
     ).toThrow("signature");
+  });
+});
+
+describe("update platforms", () => {
+  it("maps each signed file to the platforms that install it", () => {
+    expect(
+      updatePlatforms([
+        "SHA256SUMS",
+        "Tiny-Wispr_0.2.0_aarch64.dmg",
+        "Tiny-Wispr_0.2.0_aarch64.app.tar.gz",
+        "Tiny-Wispr_0.2.0_aarch64.app.tar.gz.sig",
+        "Tiny-Wispr_0.2.0_x64-setup.exe",
+        "Tiny-Wispr_0.2.0_x64-setup.exe.sig",
+        "Tiny-Wispr_0.2.0_amd64.AppImage",
+        "Tiny-Wispr_0.2.0_amd64.AppImage.sig",
+        "Tiny-Wispr_0.2.0_amd64.deb",
+        "Tiny-Wispr_0.2.0_amd64.deb.sig",
+      ])
+    ).toEqual({
+      "darwin-aarch64": "Tiny-Wispr_0.2.0_aarch64.app.tar.gz",
+      "darwin-aarch64-app": "Tiny-Wispr_0.2.0_aarch64.app.tar.gz",
+      "linux-x86_64": "Tiny-Wispr_0.2.0_amd64.AppImage",
+      "linux-x86_64-appimage": "Tiny-Wispr_0.2.0_amd64.AppImage",
+      "linux-x86_64-deb": "Tiny-Wispr_0.2.0_amd64.deb",
+      "windows-x86_64": "Tiny-Wispr_0.2.0_x64-setup.exe",
+      "windows-x86_64-nsis": "Tiny-Wispr_0.2.0_x64-setup.exe",
+    });
+  });
+
+  it("refuses a signed file no platform uses", () => {
+    expect(() => updatePlatforms(["a.zip", "a.zip.sig"])).toThrow("a.zip");
   });
 });

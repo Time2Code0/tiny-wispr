@@ -227,6 +227,44 @@ export function updaterManifest({ version, notes, pubDate, platforms }) {
 }
 
 /**
+ * Which release file the updater downloads on each platform, by file name.
+ * The plugin looks for `<os>-<arch>-<installer>` first, then `<os>-<arch>`,
+ * so a `.deb` install gets the `.deb` and every other Linux install the
+ * AppImage.
+ */
+const UPDATE_FILES = /** @type {const} */ ([
+  [/_aarch64\.app\.tar\.gz$/, ["darwin-aarch64-app", "darwin-aarch64"]],
+  [/_x64-setup\.exe$/, ["windows-x86_64-nsis", "windows-x86_64"]],
+  [/_amd64\.AppImage$/, ["linux-x86_64-appimage", "linux-x86_64"]],
+  [/_amd64\.deb$/, ["linux-x86_64-deb"]],
+]);
+
+/**
+ * The updater platforms each signed release file serves. Files without a
+ * `.sig` next to them aren't updates (the DMG, the checksums).
+ * @param {string[]} files names in the release folder
+ * @returns {Record<string, string>} platform → file name
+ */
+export function updatePlatforms(files) {
+  const present = new Set(files);
+  /** @type {Record<string, string>} */
+  const platforms = {};
+  for (const file of files) {
+    if (!present.has(`${file}.sig`)) {
+      continue;
+    }
+    const match = UPDATE_FILES.find(([pattern]) => pattern.test(file));
+    if (!match) {
+      throw new Error(`${file} is signed, but no updater platform uses it`);
+    }
+    for (const platform of match[1]) {
+      platforms[platform] = file;
+    }
+  }
+  return platforms;
+}
+
+/**
  * Prepends a section for `version` to the changelog text.
  * @param {string} changelog
  * @param {string} version

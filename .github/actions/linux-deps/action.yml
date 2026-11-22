@@ -1,0 +1,22 @@
+name: Linux build libraries
+description: The system libraries Tauri, the audio capture and the AppImage bundler need on Ubuntu, plus Xvfb for the launch check.
+
+runs:
+  using: composite
+  steps:
+    - name: Install packages
+      shell: bash
+      run: |
+        sudo apt-get update --quiet
+        sudo apt-get install --yes --quiet --no-install-recommends \
+          build-essential \
+          file \
+          libasound2-dev \
+          libayatana-appindicator3-dev \
+          libfuse2 \
+          librsvg2-dev \
+          libssl-dev \
+          libwebkit2gtk-4.1-dev \
+          libxdo-dev \
+          patchelf \
+          xvfb

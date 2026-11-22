@@ -218,8 +218,12 @@ impl Updates {
         let manifest: serde_json::Value =
             serde_json::from_slice(&body).map_err(|_| BAD_MANIFEST.to_owned())?;
         let endpoint = Url::parse(&url).map_err(|_| BAD_MANIFEST.to_owned())?;
+        let exiting = app.clone();
         let updater = app
             .updater_builder()
+            // Windows starts the installer and exits the process on the spot,
+            // without the app's own exit events.
+            .on_before_exit(move || crate::shutdown(&exiting))
             .endpoints(vec![endpoint])
             .and_then(tauri_plugin_updater::UpdaterBuilder::build)
             .map_err(|err| format!("Updates don't work in this copy of Tiny Wispr: {err}"))?;

@@ -1,7 +1,8 @@
 name: CI
 
-# `pnpm verify` and one scripted dictation on Apple Silicon. The release
-# workflow calls this too, so nothing is published that fails it.
+# `pnpm verify` and one scripted dictation on Apple Silicon, and the Rust
+# lints and tests on Windows and Linux. The release workflow calls this too,
+# so nothing is published that fails it.
 
 on:
   push:
@@ -83,3 +84,60 @@ jobs:
             target/debug/tiny-wispr
           echo "Inserted: $(cat "$work/out.txt")"
           grep -qi "fox" "$work/out.txt"
+
+  rust:
+    name: Rust on ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            platform: windows
+            runner: windows-latest
+          - name: Linux
+            platform: linux
+            runner: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Install Linux build libraries
+        if: matrix.platform == 'linux'
+        uses: ./.github/actions/linux-deps
+
+      - name: Setup Windows build tools
+        if: matrix.platform == 'windows'
+        run: echo "LIBCLANG_PATH=C:\\Program Files\\LLVM\\bin" >> "$GITHUB_ENV"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+          components: clippy
+
+      - name: Cache Rust builds
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: verify
+
+      # Tauri's build script needs the frontend folder and the sidecar to exist.
+      - name: Prepare the build
+        run: |
+          mkdir -p dist
+          node scripts/build-worker.mjs
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --workspace

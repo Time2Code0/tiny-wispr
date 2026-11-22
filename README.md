@@ -28,7 +28,7 @@ Under `pnpm tauri dev` macOS names the app that started it (your terminal or edi
 pnpm app:mac    # builds a debug bundle and opens it
 ```
 
-The debug bundle is signed with a self-signed "Tiny Wispr Development" certificate that the script creates in your login keychain the first time. A signature that stays the same keeps macOS from asking for the permissions again after every rebuild. Release builds are still signed ad hoc: see [Building and releasing](docs/operations/building-and-releasing.md).
+The debug bundle is signed with a self-signed "Tiny Wispr Development" certificate that the script creates in your login keychain the first time. A signature that stays the same keeps macOS from asking for the permissions again after every rebuild. Releases are built by GitHub Actions for macOS (Apple Silicon), Windows and Linux and signed with a release certificate: see [Building and releasing](docs/operations/building-and-releasing.md).
 
 In browser-only mode, open `/`, `/onboarding.html` or `/pill.html`. You can drive the mock from the console with `window.__tinyWisprMock`.
 

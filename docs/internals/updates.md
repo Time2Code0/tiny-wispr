@@ -27,6 +27,8 @@ The plugin can check and download by itself with its own HTTP client. The app do
 
 The language model worker is stopped before the swap, because the new bundle has its own worker binary.
 
+On Windows, `install` starts the NSIS installer (`/UPDATE`, passive) and exits the process itself, without Tauri's exit events. The updater's `on_before_exit` hook runs the app's `shutdown` first. The installer starts the new version when it's done. On Linux the plugin replaces the AppImage at `$APPIMAGE`, or for a `.deb` install runs `dpkg -i` through `pkexec`.
+
 ## States
 
 ```text
@@ -62,10 +64,18 @@ Only when the user clicks **Check for updates**, or when `settings.check_for_upd
     "darwin-aarch64": {
       "url": "https://github.com/Time2Code0/tiny-wispr/releases/download/v0.2.0/Tiny-Wispr_0.2.0_aarch64.app.tar.gz",
       "signature": "<contents of the .sig file>"
-    }
+    },
+    "darwin-aarch64-app": { "…": "the same entry" },
+    "windows-x86_64": { "url": "…/Tiny-Wispr_0.2.0_x64-setup.exe", "signature": "…" },
+    "windows-x86_64-nsis": { "…": "the same entry" },
+    "linux-x86_64": { "url": "…/Tiny-Wispr_0.2.0_amd64.AppImage", "signature": "…" },
+    "linux-x86_64-appimage": { "…": "the same entry" },
+    "linux-x86_64-deb": { "url": "…/Tiny-Wispr_0.2.0_amd64.deb", "signature": "…" }
   }
 }
 ```
+
+The plugin looks for `<os>-<arch>-<installer>` first, then `<os>-<arch>`, where the installer is how the running copy was installed. So a `.deb` install gets the `.deb`, and every other Linux copy the AppImage. `updatePlatforms` in `scripts/lib/release.mjs` decides which file serves which platform, from the file names.
 
 The notes are Markdown. The About page shows headings, bullets and paragraphs as plain text (`release-notes.ts`) and never renders HTML from the server.
 

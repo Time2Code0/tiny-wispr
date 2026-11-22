@@ -16,14 +16,12 @@ import {
   parseVersion,
   readVersions,
   releaseNotes,
+  updatePlatforms,
   updaterManifest,
   versionProblems,
 } from "./lib/release.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-/** The updater's name for each archive, from the arch in its file name. */
-const PLATFORMS = { aarch64: "darwin-aarch64" };
-const ARCHIVE = /_([a-z0-9_]+)\.app\.tar\.gz$/;
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -89,21 +87,18 @@ const commands = {
     if (!(values.dir && values.repo && values.notes)) {
       throw new Error("manifest needs --dir, --repo and --notes");
     }
-    const platforms = {};
-    for (const file of readdirSync(values.dir)) {
-      const arch = ARCHIVE.exec(file)?.[1];
-      if (!arch) {
-        continue;
-      }
-      const platform = PLATFORMS[arch];
-      if (!platform) {
-        throw new Error(`No updater platform for ${file}`);
-      }
-      platforms[platform] = {
-        signature: readFileSync(join(values.dir, `${file}.sig`), "utf8").trim(),
-        url: `https://github.com/${values.repo}/releases/download/${values.tag}/${file}`,
-      };
-    }
+    const { dir, repo, tag } = values;
+    const platforms = Object.fromEntries(
+      Object.entries(updatePlatforms(readdirSync(dir))).map(
+        ([platform, file]) => [
+          platform,
+          {
+            signature: readFileSync(join(dir, `${file}.sig`), "utf8").trim(),
+            url: `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(file)}`,
+          },
+        ]
+      )
+    );
     const manifest = updaterManifest({
       notes: readFileSync(values.notes, "utf8").trim(),
       platforms,

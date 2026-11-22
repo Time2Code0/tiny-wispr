@@ -4,15 +4,27 @@ Tiny Wispr turns speech into text on your own computer. You hold a key, say some
 
 ## What you need
 
-- macOS 13 or later. macOS is the platform the app is built and tested on. Windows and Linux (X11) are supported in the code, but get less testing. Linux on Wayland can't use global shortcuts or paste into other apps.
+- macOS 13 or later on Apple Silicon, Windows 10 or 11 (x64), or Linux (x64) with an X11 session. macOS is the platform the app is tested on most; Windows and Linux builds are published with every release but get less testing. Linux on Wayland can't use global shortcuts or paste into other apps.
 - A microphone.
 - Room for a voice model: from about 75 MB (Tiny) to about 3 GB (Large v3). The setup recommends one for your computer.
 
 ## Install
 
-Download `Tiny-Wispr_<version>_aarch64.dmg` from the [latest release](https://github.com/Time2Code0/tiny-wispr/releases/latest), open it and drag Tiny Wispr to Applications. Releases are built for Macs with Apple Silicon. On an Intel Mac, build the app from source: see [Building and releasing](../operations/building-and-releasing.md).
+Download the file for your computer from the [latest release](https://github.com/Time2Code0/tiny-wispr/releases/latest):
 
-Tiny Wispr isn't notarized by Apple, so the first time you open it macOS says it can't check the app for malicious software. Open **System Settings → Privacy & Security**, scroll down to the message about Tiny Wispr, and click **Open Anyway**. You only do this once: updates install from inside the app (see [Updating](updating.md)).
+| System | File |
+| --- | --- |
+| macOS, Apple Silicon | `Tiny-Wispr_<version>_aarch64.dmg` |
+| Windows, x64 | `Tiny-Wispr_<version>_x64-setup.exe` |
+| Linux, x64 | `Tiny-Wispr_<version>_amd64.AppImage` or `Tiny-Wispr_<version>_amd64.deb` |
+
+Intel Macs and other processors aren't built: build the app from source, see [Building and releasing](../operations/building-and-releasing.md).
+
+- **macOS:** open the DMG and drag Tiny Wispr to Applications. Tiny Wispr isn't notarized by Apple, so the first time you open it macOS says it can't check the app for malicious software. Open **System Settings → Privacy & Security**, scroll down to the message about Tiny Wispr, and click **Open Anyway**.
+- **Windows:** run the installer. It installs for your user only, without administrator rights. The installer isn't code-signed, so SmartScreen may say it protected your PC: click **More info**, then **Run anyway**.
+- **Linux:** make the AppImage executable (`chmod +x Tiny-Wispr_*.AppImage`) and run it, or install the package with `sudo apt install ./Tiny-Wispr_<version>_amd64.deb`.
+
+You only do this once: updates install from inside the app (see [Updating](updating.md)).
 
 ## First run
 

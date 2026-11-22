@@ -85,30 +85,38 @@ Versions are semver. `X.Y.Z` is a release; `X.Y.Z-rc.N` (any suffix) is a prerel
 | --- | --- | --- |
 | `preflight` | ubuntu | The tag matches the three versions; a release tag (no suffix) is on `main`; the four secrets are set |
 | `verify` | macos-15 | `.github/workflows/ci.yml`: `pnpm verify`, then a smoke run of the debug build with a `say` recording and `ggml-tiny.en.bin` |
-| `build` | macos-15 (Apple Silicon) | Imports the certificate into a temporary keychain, `pnpm tauri build --bundles app,dmg` with `createUpdaterArtifacts`, checks the code signature, checks the update signature names the version and verifies with the public key in `tauri.conf.json`, starts the app and checks it's still running after 20 seconds |
-| `release` | ubuntu | Writes the notes, `latest.json` and `SHA256SUMS`, creates a draft release with every file, then publishes it |
+| `build` | One job per platform: `macos-15` (Apple Silicon), `windows-latest` (x64), `ubuntu-22.04` (x64) | `pnpm tauri build` with `createUpdaterArtifacts` (`app,dmg`, `nsis`, `appimage,deb`). On macOS it imports the certificate into a temporary keychain first and checks the code signature after. It signs the `.deb` for the updater if the bundler didn't, starts the app (under Xvfb on Linux) and checks it's still running after 20 seconds |
+| `release` | ubuntu | Checks every update signature names the version and verifies with the public key in `tauri.conf.json` (`minisign`), writes the notes, `latest.json` and `SHA256SUMS`, creates a draft release with every file, then publishes it |
 
 The release files:
 
-- `Tiny-Wispr_<version>_aarch64.dmg`: what people download.
-- `Tiny-Wispr_<version>_aarch64.app.tar.gz` and its `.sig`: what the updater downloads.
-- `latest.json`: the manifest the updater reads ([Updates](../internals/updates.md#the-manifest)).
-- `SHA256SUMS`.
+| File | People download it | The updater downloads it |
+| --- | --- | --- |
+| `Tiny-Wispr_<version>_aarch64.dmg` | macOS | |
+| `Tiny-Wispr_<version>_aarch64.app.tar.gz` + `.sig` | | macOS |
+| `Tiny-Wispr_<version>_x64-setup.exe` + `.sig` | Windows | Windows (the installer itself) |
+| `Tiny-Wispr_<version>_amd64.AppImage` + `.sig` | Linux | Linux, AppImage installs |
+| `Tiny-Wispr_<version>_amd64.deb` + `.sig` | Debian, Ubuntu | Linux, `.deb` installs |
+| `latest.json` | | Every platform ([Updates](../internals/updates.md#the-manifest)) |
+| `SHA256SUMS` | | |
 
-A release tag is published as the latest release, which installed apps are offered. A prerelease is published as a GitHub prerelease: `releases/latest` skips it, so no installed app is offered it unless pointed at it with `TINY_WISPR_UPDATE_URL`. Only Apple Silicon is built. Intel Macs build from source.
+Intel Macs and ARM Windows or Linux aren't built; they build from source. Windows installers aren't code-signed (SmartScreen warns once); updates are still verified with the updater key.
+
+A release tag is published as the latest release, which installed apps are offered. A prerelease is published as a GitHub prerelease: `releases/latest` skips it, so no installed app is offered it unless pointed at it with `TINY_WISPR_UPDATE_URL`.
+
+Running the workflow by hand (Actions → Release → Run workflow), or a pull request that changes `.github/`, `scripts/` or the Tauri config, builds every platform without publishing. The files are kept as the run's artifacts, `release-assets-<platform>`, for trying a build before it's released.
 
 The notes come from the commit subjects since the previous tag (`scripts/release-ci.mjs notes`): `feat`, `fix` and `perf` commits, grouped, with the first letter capitalised. Everything else is left out. That is why commit subjects are written for people.
 
-`.github/workflows/ci.yml` also runs on every push to `main` and every pull request.
+`.github/workflows/ci.yml` also runs on every push to `main` and every pull request: `pnpm verify` and the smoke run on macOS, and `cargo clippy` and `cargo test` for the workspace on Windows and Linux. The Linux jobs install their system libraries with `.github/actions/linux-deps`; Windows needs `LIBCLANG_PATH` for whisper.cpp's and llama.cpp's bindings.
 
 ## Windows and Linux
 
-The code has Windows and Linux (X11) implementations behind `cfg` ([OS integration](../internals/os-integration.md#platform-status)) and `bundle.targets` is `"all"`, but only macOS is built and tested regularly. Before shipping another platform:
+The code has Windows and Linux (X11) implementations behind `cfg` ([OS integration](../internals/os-integration.md#platform-status)). Every release builds them and CI lints and tests them, but nobody dictates with them regularly; only macOS gets the scripted smoke run (it needs `say`). Before trusting a release on one of them:
 
-- Build on that platform (the sidecar script uses the host's target triple; there is no cross compile).
-- Run the smoke run and the full test suite there.
 - Check each row of the platform table in [OS integration](../internals/os-integration.md#platform-status) by hand with a real keyboard and a real second app: the key listener and insertion can't be unit-tested.
-- Linux needs the Tauri system libraries (`webkit2gtk`, etc.) plus X11 dev libraries; Wayland sessions have no global shortcuts or paste.
+- Build on that platform to work on it (the sidecar script uses the host's target triple; there is no cross compile).
+- Linux needs the Tauri system libraries (`webkit2gtk`, etc.), ALSA and X11; `.github/actions/linux-deps` lists them for Ubuntu. Wayland sessions have no global shortcuts or paste.
 
 ## Release checklist
 

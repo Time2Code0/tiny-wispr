@@ -172,7 +172,7 @@ fn setup(app: &mut App) -> anyhow::Result<()> {
 }
 
 /// Stops dictation and drops the voice model before the process exits.
-fn shutdown(app: &AppHandle) {
+pub(crate) fn shutdown(app: &AppHandle) {
     let Some(state) = app.try_state::<AppState>() else {
         return;
     };
