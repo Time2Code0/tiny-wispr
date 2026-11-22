@@ -1,4 +1,4 @@
-use std::fs::{self, File};
+use std::fs::{self, File, OpenOptions};
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 
@@ -149,7 +149,8 @@ impl Inventory {
         crate::download::check_space(&dir, size)?;
         let staging = dir.join(format!("{file}{IMPORT_SUFFIX}"));
         let copied = fs::copy(source, &staging)
-            .and_then(|_| File::open(&staging)?.sync_all())
+            // Windows only flushes a file opened for writing.
+            .and_then(|_| OpenOptions::new().write(true).open(&staging)?.sync_all())
             .and_then(|()| fs::rename(&staging, &destination));
         if let Err(e) = copied {
             let _ = fs::remove_file(&staging);
