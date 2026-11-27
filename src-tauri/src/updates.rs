@@ -16,7 +16,7 @@ use crate::error::{CommandError, CommandResult};
 use crate::files::FileJobs;
 use crate::state::{AppState, lock};
 use crate::windows::now_ms;
-use crate::{events, tray};
+use crate::{build_flavor, events, tray};
 
 /// `latest.json` is a few hundred bytes.
 const MANIFEST_LIMIT: u64 = 1024 * 1024;
@@ -202,7 +202,7 @@ impl Updates {
 
     /// Fetches the manifest; `Some` when it offers a newer version.
     fn fetch_update(&self, app: &AppHandle) -> Result<Option<Update>, String> {
-        let url = endpoint(app).ok_or_else(|| "No update address is set".to_owned())?;
+        let url = endpoint(app)?;
         let body = self
             .downloader
             .get(&url, MANIFEST_LIMIT, &mut |_, _| ())
@@ -286,19 +286,22 @@ impl Updates {
 /// `tauri.conf.json`, or `TINY_WISPR_UPDATE_URL` to test an update from a
 /// prerelease or a local server. The override is safe in release builds:
 /// the archive must still carry our signature for the version it claims, and
-/// only a newer version is installed.
-fn endpoint(app: &AppHandle) -> Option<String> {
+/// only a newer version is installed. Development builds only use the
+/// override, so they never replace themselves with a release.
+fn endpoint(app: &AppHandle) -> Result<String, String> {
     if let Ok(url) = std::env::var("TINY_WISPR_UPDATE_URL") {
-        return Some(url);
+        return Ok(url);
+    }
+    if build_flavor::DEVELOPMENT {
+        return Err("Development builds don't check for updates".to_owned());
     }
     app.config()
         .plugins
         .0
-        .get("updater")?
-        .get("endpoints")?
-        .get(0)?
-        .as_str()
+        .get("updater")
+        .and_then(|updater| updater.get("endpoints")?.get(0)?.as_str())
         .map(str::to_owned)
+        .ok_or_else(|| "No update address is set".to_owned())
 }
 
 /// A dictation or file transcription would be cut off by the restart.

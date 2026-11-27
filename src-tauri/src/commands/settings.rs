@@ -1,7 +1,8 @@
 use tauri::{AppHandle, State};
-use tw_core::hotkey::{Platform, Shortcuts};
+use tw_core::hotkey::Shortcuts;
 use tw_core::{Settings, SettingsPatch};
 
+use crate::build_flavor;
 use crate::dictation::Msg;
 use crate::error::CommandResult;
 use crate::state::AppState;
@@ -29,8 +30,14 @@ pub fn update_settings(
 #[tauri::command]
 pub fn reset_shortcuts(app: AppHandle, state: State<'_, AppState>) -> CommandResult<Settings> {
     save(&app, &state, |s| {
-        s.shortcuts = Shortcuts::defaults(Platform::current());
+        s.shortcuts = build_flavor::default_shortcuts();
     })
+}
+
+/// What `reset_shortcuts` restores. Development builds have their own.
+#[tauri::command]
+pub fn get_default_shortcuts() -> Shortcuts {
+    build_flavor::default_shortcuts()
 }
 
 /// Applies `change`, persists it, emits `settings:changed` and applies the

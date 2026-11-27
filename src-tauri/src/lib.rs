@@ -3,6 +3,7 @@
 
 #[cfg(target_os = "macos")]
 mod app_menu;
+mod build_flavor;
 mod commands;
 mod dictation;
 mod error;
@@ -68,17 +69,28 @@ fn debug_override(var: &str) -> Option<PathBuf> {
         .flatten()
 }
 
+/// A development build uses the installed app's model folder, so the same
+/// gigabytes aren't downloaded twice.
+fn shared_models_dir(app: &App) -> anyhow::Result<PathBuf> {
+    let release = build_flavor::release_identifier(&app.config().identifier);
+    let data_dir = app.path().data_dir().context("no data directory")?;
+    Ok(AppPaths::new(&data_dir.join(release)).models_dir)
+}
+
 fn setup(app: &mut App) -> anyhow::Result<()> {
     let data_dir = match debug_override("TINY_WISPR_DATA_DIR") {
         Some(dir) => dir,
         None => app.path().app_data_dir().context("no app data directory")?,
     };
     let paths = AppPaths::new(&data_dir);
-    let inventory = Inventory::new(
-        debug_override("TINY_WISPR_MODELS_DIR").unwrap_or_else(|| paths.models_dir.clone()),
-    );
+    let models_dir = match debug_override("TINY_WISPR_MODELS_DIR") {
+        Some(dir) => dir,
+        None if build_flavor::DEVELOPMENT => shared_models_dir(app)?,
+        None => paths.models_dir.clone(),
+    };
+    let inventory = Inventory::new(models_dir);
     let data = Arc::new(Data::load(paths));
-    tracing::info!(path = %data.paths.data_dir.display(), models = %inventory.root().display(), "data loaded");
+    tracing::info!(app = build_flavor::APP_NAME, path = %data.paths.data_dir.display(), models = %inventory.root().display(), "data loaded");
     if data.settings.get().history_retention != HistoryRetention::Forever {
         data.change_history(|_| ())?;
     }
@@ -203,11 +215,13 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build());
     #[cfg(target_os = "macos")]
     let builder = builder.menu(app_menu::build);
+    let mut context = tauri::generate_context!();
+    build_flavor::apply(&mut context);
     let app = builder
         .invoke_handler(commands::handler())
         .on_window_event(windows::on_window_event)
         .setup(|app| setup(app).map_err(Into::into))
-        .build(tauri::generate_context!());
+        .build(context);
 
     let app = match app {
         Ok(app) => app,

@@ -51,7 +51,7 @@ Only when the user clicks **Check for updates**, or when `settings.check_for_upd
 `plugins.updater.endpoints[0]` in `tauri.conf.json`:
 `https://github.com/Time2Code0/tiny-wispr/releases/latest/download/latest.json`. GitHub serves the asset of the newest published release that isn't a prerelease, so drafts and `-rc` builds are never offered.
 
-`TINY_WISPR_UPDATE_URL` replaces the address in any build. That is how a prerelease is tested ([Building and releasing](../operations/building-and-releasing.md#testing-an-update)). It's safe to leave in release builds: an archive is only installed with our signature for the version it claims, and only when that version is newer.
+Debug builds have no address: a check fails with "Development builds don't check for updates", so a development build never replaces itself with a release. `TINY_WISPR_UPDATE_URL` replaces the address in any build. That is how a prerelease is tested ([Building and releasing](../operations/building-and-releasing.md#testing-an-update)). It's safe to leave in release builds: an archive is only installed with our signature for the version it claims, and only when that version is newer.
 
 `latest.json` is written by `scripts/release-ci.mjs manifest`:
 

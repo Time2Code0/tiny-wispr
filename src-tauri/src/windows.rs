@@ -9,6 +9,7 @@ use tauri::{
 };
 use tw_core::Settings;
 
+use crate::build_flavor::APP_NAME;
 use crate::state::AppState;
 use crate::{events, pill};
 
@@ -77,7 +78,7 @@ pub fn create_pill(app: &AppHandle) -> tauri::Result<WebviewWindow> {
         return Ok(window);
     }
     let window = WebviewWindowBuilder::new(app, PILL, WebviewUrl::App("pill.html".into()))
-        .title("Tiny Wispr")
+        .title(APP_NAME)
         .inner_size(PILL_SIZE.0, PILL_SIZE.1)
         .transparent(true)
         .decorations(false)
@@ -128,7 +129,7 @@ pub fn show_onboarding(app: &AppHandle) -> tauri::Result<WebviewWindow> {
                 ONBOARDING,
                 WebviewUrl::App("onboarding.html".into()),
             )
-            .title("Welcome to Tiny Wispr")
+            .title(format!("Welcome to {APP_NAME}"))
             .inner_size(720.0, 560.0)
             .resizable(false)
             .maximizable(false)
@@ -160,7 +161,7 @@ pub fn show_main(app: &AppHandle, route: Option<MainRoute>) -> tauri::Result<Web
             let route = route.unwrap_or_default();
             let builder =
                 WebviewWindowBuilder::new(app, MAIN, WebviewUrl::App("index.html".into()))
-                    .title("Tiny Wispr")
+                    .title(APP_NAME)
                     .inner_size(1040.0, 720.0)
                     .min_inner_size(860.0, 560.0)
                     .center()

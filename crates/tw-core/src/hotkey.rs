@@ -252,6 +252,32 @@ impl Shortcuts {
         Hotkey::modifiers([Modifier::Ctrl, Modifier::Alt])
     }
 
+    /// Defaults for development builds, which run next to the installed app.
+    /// No chord here contains a release one or is contained in one, so a
+    /// press never starts both apps.
+    pub fn development(platform: Platform) -> Self {
+        use Modifier::{Alt, Ctrl, Meta, Shift};
+        let cancel = Hotkey::with_key([], "Escape");
+        match platform {
+            // ⌥⌘ Space opens a Finder search window, so hands-free uses the
+            // period key.
+            Platform::Macos => Self {
+                push_to_talk: Hotkey::modifiers([Alt, Meta]),
+                hands_free: Hotkey::with_key([Alt, Meta], "Period"),
+                cancel,
+                paste_last: Hotkey::with_key([Ctrl, Shift], "KeyV"),
+                command_mode: Hotkey::modifiers([Alt, Meta, Shift]),
+            },
+            Platform::Windows | Platform::Linux => Self {
+                push_to_talk: Hotkey::modifiers([Ctrl, Shift]),
+                hands_free: Hotkey::with_key([Ctrl, Shift], "Space"),
+                cancel,
+                paste_last: Hotkey::with_key([Alt, Shift], "KeyX"),
+                command_mode: Hotkey::modifiers([Ctrl, Shift, Alt]),
+            },
+        }
+    }
+
     pub fn get(&self, action: HotkeyAction) -> &Hotkey {
         match action {
             HotkeyAction::PushToTalk => &self.push_to_talk,
@@ -864,6 +890,45 @@ mod tests {
         fallback.command_mode = Hotkey::modifiers([Ctrl, Alt, Shift]);
         for (action, hotkey) in fallback.iter() {
             assert_eq!(validate(action, hotkey, Platform::Macos, &fallback), Ok(()));
+        }
+    }
+
+    #[test]
+    fn development_defaults_stay_clear_of_the_release_ones() {
+        let modifiers_within = |inner: &Hotkey, outer: &Hotkey| {
+            inner.key.is_none() && inner.modifiers.is_subset(&outer.modifiers)
+        };
+        for platform in PLATFORMS {
+            let dev = Shortcuts::development(platform);
+            let mut release: Vec<Hotkey> = Shortcuts::defaults(platform)
+                .iter()
+                .filter(|(action, _)| *action != HotkeyAction::Cancel)
+                .map(|(_, hotkey)| hotkey.clone())
+                .collect();
+            if platform == Platform::Macos {
+                release.extend([
+                    Shortcuts::macos_push_to_talk_without_fn(),
+                    Hotkey::with_key([Ctrl, Alt], "Space"),
+                    Hotkey::modifiers([Ctrl, Alt, Shift]),
+                ]);
+            }
+            for (action, hotkey) in dev.iter() {
+                assert_eq!(
+                    validate(action, hotkey, platform, &dev),
+                    Ok(()),
+                    "{action:?} on {platform:?}"
+                );
+                if action == HotkeyAction::Cancel {
+                    continue;
+                }
+                for other in &release {
+                    assert_ne!(hotkey, other, "{action:?} on {platform:?}");
+                    assert!(
+                        !modifiers_within(other, hotkey) && !modifiers_within(hotkey, other),
+                        "{action:?} on {platform:?} overlaps {other:?}"
+                    );
+                }
+            }
         }
     }
 

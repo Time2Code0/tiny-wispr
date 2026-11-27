@@ -18,6 +18,7 @@ pub fn handler() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static 
         settings::get_settings,
         settings::update_settings,
         settings::reset_shortcuts,
+        settings::get_default_shortcuts,
         hotkeys::validate_hotkey,
         hotkeys::start_hotkey_capture,
         hotkeys::stop_hotkey_capture,

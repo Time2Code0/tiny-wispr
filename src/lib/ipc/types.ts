@@ -513,6 +513,8 @@ export interface Commands {
   download_model: { args: { id: string }; result: null };
   /** Downloads the release the last check found. */
   download_update: { args: undefined; result: null };
+  /** What reset_shortcuts restores; development builds have their own. */
+  get_default_shortcuts: { args: undefined; result: Shortcuts };
   get_dictation_state: { args: undefined; result: DictationState };
   /** The running file job's latest progress; null when none runs. */
   get_file_transcription: { args: undefined; result: FileProgress | null };

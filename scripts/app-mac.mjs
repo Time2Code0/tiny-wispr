@@ -1,16 +1,20 @@
-// Builds the debug app bundle and opens it, signed with a local self-signed
+// Builds the debug app bundle, "Tiny Wispr Dev" with its own bundle id from
+// src-tauri/tauri.dev.conf.json, and opens it, signed with a local self-signed
 // certificate. An ad hoc signature changes with every build, and macOS ties
 // Microphone, Accessibility and Input Monitoring grants to the signature, so
 // each rebuild would lose them. A certificate that stays the same keeps them.
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const IDENTITY = "Tiny Wispr Development";
-const BUNDLE_ID = "dev.time2code.tinywispr";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const DEV_CONFIG = join(root, "src-tauri/tauri.dev.conf.json");
+const { identifier: BUNDLE_ID, productName: APP_NAME } = JSON.parse(
+  readFileSync(DEV_CONFIG, "utf8")
+);
 const keychain = join(
   process.env.HOME ?? "",
   "Library/Keychains/login.keychain-db"
@@ -116,14 +120,18 @@ if (!hasIdentity()) {
   createIdentity();
 }
 
-execFileSync("pnpm", ["tauri", "build", "--debug", "--bundles", "app"], {
-  cwd: root,
-  env: { ...process.env, APPLE_SIGNING_IDENTITY: IDENTITY },
-  stdio: "inherit",
-});
+execFileSync(
+  "pnpm",
+  ["tauri", "build", "--debug", "--bundles", "app", "--config", DEV_CONFIG],
+  {
+    cwd: root,
+    env: { ...process.env, APPLE_SIGNING_IDENTITY: IDENTITY },
+    stdio: "inherit",
+  }
+);
 
 if (!process.argv.includes("--no-open")) {
   execFileSync("open", [
-    join(root, "target/debug/bundle/macos/Tiny Wispr.app"),
+    join(root, `target/debug/bundle/macos/${APP_NAME}.app`),
   ]);
 }

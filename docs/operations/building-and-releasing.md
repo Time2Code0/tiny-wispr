@@ -43,7 +43,7 @@ whisper-rs-sys doesn't rebuild when `GGML_*` variables change, so after changing
 
 | Build | Identity | Why |
 | --- | --- | --- |
-| Dev (`pnpm app:mac`) | Self-signed *Tiny Wispr Development*, made in your login keychain on first run | macOS keeps permission grants across rebuilds. See [Development](development.md#why-appmac-makes-a-certificate). |
+| Dev (`pnpm app:mac`) | Self-signed *Tiny Wispr Development*, made in your login keychain on first run. The bundle is *Tiny Wispr Dev* with its own identifier | macOS keeps permission grants across rebuilds. See [Development](development.md#why-appmac-makes-a-certificate). |
 | Local `pnpm tauri build` | Ad hoc (`signingIdentity: "-"`) | Fine for trying a build. Not for sharing: the signature changes every build. |
 | Release (CI) | Self-signed *Tiny Wispr*, from the `MACOS_CERTIFICATE` secret | The same certificate signs every release, so users keep their grants across updates. |
 

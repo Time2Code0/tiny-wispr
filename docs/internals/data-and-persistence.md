@@ -2,6 +2,8 @@
 
 Everything the app stores is a plain file in one folder, the OS app data directory for the identifier `dev.time2code.tinywispr`. There is no database. Audio is never stored.
 
+Debug builds use the identifier `dev.time2code.tinywispr.dev`, so they get their own folder, but they read and write the release folder's `models/` ([Development](../operations/development.md#next-to-the-installed-app)).
+
 ## Files
 
 `AppPaths` (`src-tauri/src/state.rs`) names them. `Data` loads them all at startup and is shared through `AppState.data`.
@@ -16,6 +18,8 @@ Everything the app stores is a plain file in one folder, the OS app data directo
 | `models/whisper/`, `models/llm/` | | `Inventory` | Model files, `*.partial` for unfinished downloads, `*.importing` while copying |
 
 Debug builds honour `TINY_WISPR_DATA_DIR` and `TINY_WISPR_MODELS_DIR` to point elsewhere, so tests and the smoke run leave the real data alone. Release builds ignore them.
+
+When `settings.json` is missing, debug builds start from `Shortcuts::development` instead of the platform defaults, and `reset_shortcuts` and `get_default_shortcuts` return those too.
 
 ## How files are written (`store.rs`)
 

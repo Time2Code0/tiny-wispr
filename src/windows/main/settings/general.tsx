@@ -23,6 +23,7 @@ import { useIpcQuery } from "@/hooks/use-ipc-query";
 import { useSettings } from "@/hooks/use-settings";
 import { defaultShortcuts, detectPlatform } from "@/lib/hotkey";
 import {
+  getDefaultShortcuts,
   getHardwareInfo,
   listMicrophones,
   listModels,
@@ -77,6 +78,7 @@ function ShortcutRow({
 }) {
   const { update } = useSettings();
   const hardware = useIpcQuery(getHardwareInfo);
+  const defaults = useIpcQuery(getDefaultShortcuts);
   const platform = hardware.data?.platform ?? detectPlatform();
   const change = useCallback(
     (hotkey: Hotkey) =>
@@ -94,7 +96,7 @@ function ShortcutRow({
       <HotkeyRecorder
         action={action}
         className="shrink-0 items-end"
-        defaultValue={defaultShortcuts(platform)[action]}
+        defaultValue={(defaults.data ?? defaultShortcuts(platform))[action]}
         label={label}
         onChange={change}
         platform={platform}

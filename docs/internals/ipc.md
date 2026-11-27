@@ -31,7 +31,7 @@ Every command returns `CommandResult<T>` = `Result<T, CommandError>`. `CommandEr
 
 | Group | Commands |
 | --- | --- |
-| Settings | `get_settings`, `update_settings(patch)`, `reset_shortcuts` |
+| Settings | `get_settings`, `update_settings(patch)`, `reset_shortcuts`, `get_default_shortcuts` |
 | Shortcuts | `validate_hotkey`, `start_hotkey_capture`, `stop_hotkey_capture`, `get_listener_status` |
 | Permissions | `get_permissions`, `request_permission`, `open_permission_settings` |
 | Audio | `list_microphones`, `start_mic_test`, `stop_mic_test` |

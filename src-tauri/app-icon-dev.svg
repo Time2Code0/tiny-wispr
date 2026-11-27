@@ -1,0 +1,17 @@
+<svg
+  height="1024"
+  viewBox="0 0 1024 1024"
+  width="1024"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title>Tiny Wispr Dev</title>
+  <rect fill="#e8743b" height="896" rx="208" width="896" x="64" y="64" />
+  <g fill="#2a2420">
+    <rect height="120" rx="28" width="56" x="262" y="452" />
+    <rect height="280" rx="28" width="56" x="362" y="372" />
+    <rect height="440" rx="28" width="56" x="462" y="292" />
+    <rect height="240" rx="28" width="56" x="562" y="392" />
+    <rect height="340" rx="28" width="56" x="662" y="342" />
+    <rect fill="#f6f1ea" height="100" rx="28" width="56" x="762" y="462" />
+  </g>
+</svg>

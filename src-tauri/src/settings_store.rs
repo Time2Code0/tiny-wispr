@@ -7,6 +7,7 @@ use std::sync::Mutex;
 
 use tw_core::Settings;
 
+use crate::build_flavor;
 use crate::state::lock;
 use crate::store::write_atomic;
 
@@ -25,13 +26,13 @@ impl SettingsStore {
                 Err(err) => {
                     tracing::warn!(%err, path = %path.display(), "settings file is invalid, using defaults");
                     let _ = fs::rename(&path, path.with_extension("json.bad"));
-                    Settings::default()
+                    build_flavor::default_settings()
                 }
             },
-            Err(err) if err.kind() == io::ErrorKind::NotFound => Settings::default(),
+            Err(err) if err.kind() == io::ErrorKind::NotFound => build_flavor::default_settings(),
             Err(err) => {
                 tracing::warn!(%err, path = %path.display(), "could not read settings, using defaults");
-                Settings::default()
+                build_flavor::default_settings()
             }
         };
         Self {

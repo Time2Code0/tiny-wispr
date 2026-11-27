@@ -1233,6 +1233,7 @@ export function createMockBackend(): Backend {
       updates.download();
       return null;
     },
+    get_default_shortcuts: () => defaultSettings(platform).shortcuts,
     get_dictation_state: () => state.dictation,
     get_file_transcription: () => files.current(),
     get_hardware_info: () => ({

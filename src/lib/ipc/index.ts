@@ -37,6 +37,8 @@ export const updateSettings = (patch: SettingsPatch) =>
   backend.invoke("update_settings", { patch });
 export const resetShortcuts = () =>
   backend.invoke("reset_shortcuts", undefined);
+export const getDefaultShortcuts = () =>
+  backend.invoke("get_default_shortcuts", undefined);
 
 // hotkeys
 export const validateHotkey = (action: HotkeyAction, hotkey: Hotkey) =>

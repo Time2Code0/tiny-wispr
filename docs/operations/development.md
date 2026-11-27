@@ -22,7 +22,7 @@ pnpm install
 | --- | --- |
 | `pnpm dev` | The frontend alone in a browser at <http://localhost:1420>, against the mock backend. Fast. Open `/`, `/onboarding.html` or `/pill.html`. |
 | `pnpm tauri dev` | The app. Builds the worker sidecar first, then runs Vite and the Rust app with hot reload for the frontend. |
-| `pnpm app:mac` | Builds a **debug app bundle** and opens it, signed with a stable self-signed certificate. |
+| `pnpm app:mac` | Builds a **debug app bundle**, *Tiny Wispr Dev*, and opens it, signed with a stable self-signed certificate. |
 | `pnpm build:worker` | Builds `tw-llm-worker` and copies it to `src-tauri/binaries/` |
 
 ### Which one to use
@@ -33,11 +33,29 @@ Use `pnpm tauri dev` when you change Rust or need the real thing. Under `tauri d
 
 Use `pnpm app:mac` when you need macOS to see *Tiny Wispr itself*: permissions prompts, launch at login (which needs a bundle), the menu bar icon, Dock behaviour.
 
+### Next to the installed app
+
+Every debug build (`pnpm tauri dev`, `pnpm app:mac`, `target/debug/tiny-wispr`) is **Tiny Wispr Dev**, so you can keep using a released Tiny Wispr every day while you work on the next one. `src-tauri/src/build_flavor.rs` sets this up at startup, and `pnpm app:mac` bundles with `src-tauri/tauri.dev.conf.json`, which sets the same name and identifier plus an orange icon.
+
+| | Installed app | Development build |
+| --- | --- | --- |
+| Identifier | `dev.time2code.tinywispr` | `dev.time2code.tinywispr.dev` |
+| Data folder (settings, history, dictionary, snippets) | Its own | Its own, so onboarding runs once |
+| Models | Its own `models/` | **The installed app's** `models/`, so nothing is downloaded twice. Deleting a model in one deletes it in both. `TINY_WISPR_MODELS_DIR` overrides it. |
+| Permissions, single instance, launch at login | Its own | Its own, because they follow the identifier |
+| Updates | From GitHub releases | Never, unless `TINY_WISPR_UPDATE_URL` is set |
+| Default shortcuts | fn, fn Space, fn ⌃, ⌃⌘V on macOS | ⌥⌘, ⌥⌘., ⇧⌥⌘, ⌃⇧V on macOS; Ctrl+Shift, Ctrl+Shift+Space, Ctrl+Shift+Alt, Alt+Shift+X elsewhere |
+| Menu bar icon | The bars | The bars and a dot |
+
+The development shortcuts (`Shortcuts::development`) don't contain or sit inside any release default, including the ones for Macs without an Fn key, so one press never starts both apps. Escape cancels in both, which is harmless because only the app that is dictating reacts to it. If you change a shortcut in one app, keep it apart from the other's.
+
 ### Why `app:mac` makes a certificate
 
 macOS ties Microphone, Accessibility and Input Monitoring grants to the app's code signature. An ad hoc signature changes with every build, so every rebuild loses the grants (and System Settings can show Tiny Wispr as allowed while the grant no longer applies). `scripts/app-mac.mjs` creates a self-signed **"Tiny Wispr Development"** certificate in your login keychain the first time and signs with it, which keeps the signature, and the grants, stable across rebuilds.
 
-If grants misbehave anyway: in System Settings → Privacy & Security remove Tiny Wispr with the minus button, then grant it again. `tccutil reset Accessibility dev.time2code.tinywispr` also clears one.
+If grants misbehave anyway: in System Settings → Privacy & Security remove Tiny Wispr Dev with the minus button, then grant it again. `tccutil reset Accessibility dev.time2code.tinywispr.dev` also clears one.
+
+Grants given to `pnpm app:mac` builds from before the development identity are filed under the release identifier with the development certificate, and they don't match a release. Clear them once with `tccutil reset All dev.time2code.tinywispr` before granting the installed app.
 
 ## Checks
 
