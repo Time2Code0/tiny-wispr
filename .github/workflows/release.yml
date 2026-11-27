@@ -351,7 +351,7 @@ jobs:
             echo "| Linux x64 (X11) | \`Tiny-Wispr_${VERSION}_amd64.AppImage\` or \`Tiny-Wispr_${VERSION}_amd64.deb\` |"
             echo
             echo "- **macOS:** open the DMG and drag Tiny Wispr to Applications. The app isn't notarized by Apple, so the first time you open it, go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**."
-            echo "- **Windows:** run the installer. It isn't code-signed, so Windows SmartScreen may warn: click **More info**, then **Run anyway**."
+            echo "- **Windows:** run the installer. It isn't code-signed, so Windows SmartScreen may warn: click **More info**, then **Run anyway**. On Windows 11 with Smart App Control on, Windows blocks unsigned apps outright and can't make an exception for one, so Tiny Wispr only runs once Smart App Control is turned off (Windows Security → App & browser control). Recent Windows updates let you turn it back on later; on older versions that needs Windows reinstalled."
             echo "- **Linux:** make the AppImage executable (\`chmod +x\`) and run it, or install the package with \`sudo apt install ./Tiny-Wispr_${VERSION}_amd64.deb\`. Global shortcuts and paste need an X11 session; they don't work under Wayland."
             echo
             echo "After the first install, updates install from inside the app (Settings → About)."

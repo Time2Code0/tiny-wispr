@@ -106,7 +106,7 @@ The release files:
 | `latest.json` | | Every platform ([Updates](../internals/updates.md#the-manifest)) |
 | `SHA256SUMS` | | |
 
-Intel Macs and ARM Windows or Linux aren't built; they build from source. Windows installers aren't code-signed (SmartScreen warns once); updates are still verified with the updater key.
+Intel Macs and ARM Windows or Linux aren't built; they build from source. Windows installers aren't code-signed (SmartScreen warns once); updates are still verified with the updater key. On Windows 11 with Smart App Control on, unsigned apps are blocked outright with no per-app exception, so those users have to turn Smart App Control off. Older Windows 11 versions only let it be turned back on by reinstalling Windows; Microsoft says recent updates removed that limit. The release notes and [Getting started](../user/getting-started.md#install) say so.
 
 A release tag is published as the latest release, which installed apps are offered. A prerelease is published as a GitHub prerelease: `releases/latest` skips it, so no installed app is offered it unless pointed at it with `TINY_WISPR_UPDATE_URL`.
 

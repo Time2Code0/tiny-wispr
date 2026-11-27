@@ -23,6 +23,7 @@ Intel Macs and other processors aren't built: build the app from source, see [Bu
 
 - **macOS:** open the DMG and drag Tiny Wispr to Applications. Tiny Wispr isn't notarized by Apple, so the first time you open it macOS says it can't check the app for malicious software. Open **System Settings → Privacy & Security**, scroll down to the message about Tiny Wispr, and click **Open Anyway**.
 - **Windows:** run the installer. It installs for your user only, without administrator rights. The installer isn't code-signed, so SmartScreen may say it protected your PC: click **More info**, then **Run anyway**.
+  - **Smart App Control:** on Windows 11 with Smart App Control on, Windows blocks unsigned apps outright, even ones you didn't download in a browser, and can't make an exception for one. Tiny Wispr only installs and runs once Smart App Control is turned off under Windows Security → App & browser control. Recent Windows updates let you turn it back on later; on older versions of Windows 11, turning it back on needs Windows reinstalled.
 - **Linux:** make the AppImage executable (`chmod +x Tiny-Wispr_*.AppImage`) and run it, or install the package with `sudo apt install ./Tiny-Wispr_<version>_amd64.deb`.
 
 You only do this once: updates install from inside the app (see [Updating](updating.md)).
