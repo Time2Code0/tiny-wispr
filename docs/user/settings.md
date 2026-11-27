@@ -35,7 +35,7 @@ By default Whisper detects the language of every dictation. Turn auto-detect off
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| Launch at login | Off | Start Tiny Wispr when you log in. |
+| Launch at login | Off | Start Tiny Wispr in the background when you log in, with no window open. Also offered on the last setup step. It follows the system's login items, so removing Tiny Wispr there turns this off. On macOS, if System Settings asks you to allow it, Tiny Wispr opens Login Items for you. |
 | Show the pill at all times | On | When off, the pill only appears while you dictate. |
 | Sounds | On | A soft sound when the microphone starts and stops. |
 | Show in Dock | On | macOS only. When off, Tiny Wispr lives in the menu bar. |

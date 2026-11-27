@@ -38,7 +38,7 @@ The first time you open the app it walks you through seven steps. You can quit a
 4. **Shortcut.** Shows your push-to-talk shortcut. Hold it to talk; tap it twice to keep listening hands-free. Choose Change to record a different one.
 5. **Voice model.** Pick the Whisper model that turns speech into text, and download it. One is recommended for your computer. You can change it later on the Models page.
 6. **Polish (optional).** A small local language model can tidy up your text further. You can skip this and add it later.
-7. **Try it.** Click in the box, hold your shortcut, and say something. Release to see the text. Choose Finish to open the main window.
+7. **Try it.** Click in the box, hold your shortcut, and say something. Release to see the text. Turn on **Launch at login** here if you want Tiny Wispr to start in the background whenever you log in (it's off unless you choose it; you can change it later in Settings). Choose Finish to open the main window.
 
 You can't dictate until a voice model is downloaded. The pill tells you so ("Download a voice model to start") and offers to open the Models page.
 

@@ -96,7 +96,9 @@ function StepBody({
     case "polish":
       return <PolishStep settings={settings} update={update} />;
     case "tryIt":
-      return <TryItStep platform={platform} settings={settings} />;
+      return (
+        <TryItStep platform={platform} settings={settings} update={update} />
+      );
     default:
       return null;
   }

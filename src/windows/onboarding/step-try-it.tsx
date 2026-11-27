@@ -16,6 +16,8 @@ import {
   stopDictation,
 } from "@/lib/ipc";
 
+import { LaunchAtLogin } from "./launch-at-login";
+
 /** How long the real paste gets to land before the text is added by hand. */
 const PASTE_GRACE_MS = 300;
 
@@ -77,9 +79,11 @@ function Status({
 export function TryItStep({
   platform,
   settings,
+  update,
 }: {
   platform: Platform;
   settings: Settings;
+  update: (patch: Partial<Settings>) => Promise<unknown>;
 }) {
   const state = useDictationState();
   const [text, setText] = useState("");
@@ -181,6 +185,7 @@ export function TryItStep({
           and talk without holding. Press it again to stop.
         </div>
       ) : null}
+      <LaunchAtLogin settings={settings} update={update} />
     </div>
   );
 }
