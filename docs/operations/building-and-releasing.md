@@ -53,6 +53,8 @@ The sidecar must be signed with the same identity as the app. The release workfl
 
 **Never change the release certificate.** macOS ties the Microphone, Accessibility and Input Monitoring grants to it; a release signed with a different one makes every user grant them again. It is valid for 20 years.
 
+Ad hoc signing (`signingIdentity: "-"`), which Tauri's docs suggest when there's no Apple Developer account, was considered for releases and rejected. An ad hoc signature changes with every build, so every update would make users grant those three permissions again. Tauri's docs don't cover a self-signed certificate. Step 4 of [Testing an update](#testing-an-update) (rc.1 → rc.2) is what confirms the grants survive an update.
+
 ## Keys and secrets
 
 Two keys, both made once on a maintainer's Mac and kept outside the repo (by default in `~/.tiny-wispr-release-keys/`, mode 700). **Keep a copy of every file there in a password manager.** Losing the certificate resets everyone's permissions on the next release; losing the updater key means installed apps can never update again and have to be reinstalled by hand.
