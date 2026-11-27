@@ -128,7 +128,7 @@ The code has Windows and Linux (X11) implementations behind `cfg` ([OS integrati
 
 ## Release checklist
 
-1. On `main`, with everything merged and CI green: `pnpm release 0.2.0`. It refuses a dirty tree, a version that isn't newer, or a release (not a prerelease) from another branch.
+1. On `main`, with everything merged and CI green: `pnpm release 0.2.0`. It refuses a dirty tree, a version that isn't newer (before the first tag, the current version is allowed), or a release (not a prerelease) from another branch.
 2. Read the notes it prints. They become the release notes and the "What's new" text in the app.
 3. `git push origin main v0.2.0`.
 4. Watch the Release workflow. When it's done, the release page has the DMG, the archive, its signature, `latest.json` and `SHA256SUMS`.

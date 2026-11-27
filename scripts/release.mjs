@@ -42,8 +42,13 @@ const problems = versionProblems(current);
 if (problems.length > 0) {
   fail(problems.join("\n"));
 }
+const previous = run("git", ["tag", "--list", "v*", "--sort=-v:refname"])
+  .split("\n")
+  .find(Boolean);
 const currentVersion = current["package.json"] ?? "0.0.0";
-if (compareVersions(version, currentVersion) <= 0) {
+// Before the first tag, the version in the files hasn't been released yet.
+const order = compareVersions(version, currentVersion);
+if (order < 0 || (order === 0 && previous)) {
   fail(`${version} isn't newer than ${currentVersion}`);
 }
 if (run("git", ["status", "--porcelain"])) {
@@ -58,9 +63,6 @@ if (run("git", ["tag", "--list", tag])) {
   fail(`${tag} already exists`);
 }
 
-const previous = run("git", ["tag", "--list", "v*", "--sort=-v:refname"])
-  .split("\n")
-  .find(Boolean);
 const subjects = run("git", [
   "log",
   "--format=%s",
