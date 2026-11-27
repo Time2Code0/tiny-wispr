@@ -43,7 +43,7 @@ Every command returns `CommandResult<T>` = `Result<T, CommandError>`. `CommandEr
 | App | `complete_onboarding`, `open_main_window(route)`, `hide_pill_for(minutes)`, `set_pill_hit_regions(rects)`, `list_network_log` |
 | Updates | `get_update_state`, `check_for_updates`, `download_update`, `install_update` ([Updates](updates.md)) |
 
-`update_settings` takes a `SettingsPatch`: absent fields are left alone, and for nullable settings an explicit `null` clears the value (`Option<Option<T>>` with a `double_option` deserializer). It registers or removes the login item when `launch_at_login` changes, then `save()` persists, emits `settings:changed`, and applies what takes effect immediately: pill visibility, the swallowed shortcuts (`Msg::SettingsChanged`), the tray's microphone list, Dock visibility, and history retention. It does **not** validate shortcuts: the recorder calls `validate_hotkey` first.
+`update_settings` takes a `SettingsPatch`: absent fields are left alone, and for nullable settings an explicit `null` clears the value (`Option<Option<T>>` with a `double_option` deserializer). It registers or removes the login item when `launch_at_login` differs from the OS's current state, then `save()` persists, emits `settings:changed`, and applies what takes effect immediately: pill visibility, the swallowed shortcuts (`Msg::SettingsChanged`), the tray's microphone list, Dock visibility, and history retention. It does **not** validate shortcuts: the recorder calls `validate_hotkey` first.
 
 ## Events
 

@@ -76,7 +76,9 @@ To teach it a new app, add its ids (all platforms) to `APPS`, and a test.
 
 ## Launch at login (`autostart.rs`)
 
-`set_enabled(bool)` / `is_enabled()`. On macOS `SMAppService.mainApp` registers the *bundle*, so enabling it from a plain `cargo run` binary fails; test it with `pnpm app:mac`. `is_enabled` reports false while the login item awaits approval in System Settings.
+`set_enabled(bool)` / `is_enabled()`. On macOS `SMAppService.mainApp` registers the *bundle*, so enabling it from a plain `cargo run` binary fails; test it with `pnpm app:mac`. `is_enabled` reports false while the login item awaits approval in System Settings; when `set_enabled(true)` leaves it awaiting approval, it opens Login Items in System Settings and returns an error asking the user to allow it. Turning it off when nothing is registered is a no-op.
+
+The app treats the OS as the source of truth: at startup `sync_launch_at_login` writes the login item's state into `settings.launchAtLogin`, and `update_settings` compares a requested change with `is_enabled()` rather than the saved value, since the user can add or remove the item in System Settings.
 
 ## FFI and `unsafe`
 

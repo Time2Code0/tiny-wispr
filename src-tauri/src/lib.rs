@@ -91,6 +91,7 @@ fn setup(app: &mut App) -> anyhow::Result<()> {
     let inventory = Inventory::new(models_dir);
     let data = Arc::new(Data::load(paths));
     tracing::info!(app = build_flavor::APP_NAME, path = %data.paths.data_dir.display(), models = %inventory.root().display(), "data loaded");
+    commands::settings::sync_launch_at_login(&data);
     if data.settings.get().history_retention != HistoryRetention::Forever {
         data.change_history(|_| ())?;
     }
