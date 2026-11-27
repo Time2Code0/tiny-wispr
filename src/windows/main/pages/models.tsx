@@ -263,7 +263,7 @@ export function ModelsPage() {
 
   return (
     <Page
-      description="Models run on this computer. Downloading one is the only time Tiny Wispr uses the internet."
+      description="Models run on this computer. Downloading one and checking for updates are the only times Tiny Wispr goes online."
       title="Models"
     >
       {hardware.data ? (
