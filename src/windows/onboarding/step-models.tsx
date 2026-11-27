@@ -4,8 +4,6 @@ import { useCallback } from "react";
 
 import { CleanupLevelCards } from "@/components/cleanup-level-cards";
 import { ModelList } from "@/components/model-list";
-import { OfflineNotice } from "@/components/offline-notice";
-import { Button } from "@/components/ui/button";
 import { useIpcQuery } from "@/hooks/use-ipc-query";
 import { getHardwareInfo, getRecommendation } from "@/lib/ipc";
 
@@ -30,21 +28,6 @@ type Update = (patch: Partial<Settings>) => Promise<unknown>;
 const logError = (error: unknown) => {
   console.error("Could not save the model choice", error);
 };
-
-function GoOnline({ update }: { update: Update }) {
-  const goOnline = useCallback(() => {
-    update({ offline: false }).catch(logError);
-  }, [update]);
-  return (
-    <OfflineNotice
-      action={
-        <Button onClick={goOnline} size="sm" type="button" variant="outline">
-          Turn it off
-        </Button>
-      }
-    />
-  );
-}
 
 export function VoiceModelStep({
   settings,
@@ -73,12 +56,10 @@ export function VoiceModelStep({
           {reason ? ` · ${reason}` : null}
         </p>
       ) : null}
-      {settings.offline ? <GoOnline update={update} /> : null}
       <ModelList
         className="min-h-0 flex-1"
         kind="voice"
         languages={settings.languages}
-        offline={settings.offline}
         onSelect={select}
         selectedId={settings.sttModel}
       />
@@ -107,11 +88,9 @@ export function PolishStep({
   );
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      {settings.offline ? <GoOnline update={update} /> : null}
       <ModelList
         className="min-h-0 flex-1"
         kind="language"
-        offline={settings.offline}
         onSelect={select}
         selectedId={settings.llmModel}
       />

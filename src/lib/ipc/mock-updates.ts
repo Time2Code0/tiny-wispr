@@ -25,7 +25,6 @@ export interface MockUpdateHost {
   currentVersion: string;
   emit: (state: UpdateState) => void;
   log: (request: NetworkRequest) => void;
-  offline: () => boolean;
   /** The app restarts; the browser preview reloads the page. */
   restart: () => void;
 }
@@ -64,13 +63,6 @@ function sampleRelease(currentVersion: string): Release {
     publishedAt: Date.now() - 2 * 60 * 60 * 1000,
     version: nextVersion(currentVersion),
   };
-}
-
-function offlineError(what: string): IpcError {
-  return new IpcError(
-    "offline",
-    `Stay offline is on, so Tiny Wispr can't ${what}`
-  );
 }
 
 /**
@@ -124,9 +116,6 @@ export function createMockUpdates(host: MockUpdateHost): MockUpdates {
 
   return {
     check() {
-      if (host.offline()) {
-        throw offlineError("check for updates");
-      }
       if (!canCheck()) {
         return;
       }
@@ -153,9 +142,6 @@ export function createMockUpdates(host: MockUpdateHost): MockUpdates {
       }, CHECK_MS);
     },
     download() {
-      if (host.offline()) {
-        throw offlineError("download the update");
-      }
       const found = downloadable();
       if (!found) {
         return;

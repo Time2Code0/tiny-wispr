@@ -92,8 +92,7 @@ function RequestRow({ request }: { request: NetworkRequest }) {
 }
 
 /** Every request the app has made, so the privacy promise can be checked. */
-/** `children` (the Stay offline switch) sits above the list of requests. */
-export function NetworkActivity({ children }: { children?: React.ReactNode }) {
+export function NetworkActivity() {
   const log = useIpcQuery(listNetworkLog, LOG_EVENTS);
   if (!log.data) {
     return null;
@@ -103,12 +102,11 @@ export function NetworkActivity({ children }: { children?: React.ReactNode }) {
     <Section
       description={
         requests.length === 0
-          ? "Nothing yet. Tiny Wispr only goes online when you download a model."
+          ? "Nothing yet. Tiny Wispr only goes online to download a model or check for updates."
           : `Every request Tiny Wispr has made. ${countLabel(log.data.length)}`
       }
       title="Network activity"
     >
-      {children}
       {requests.length > 0 ? (
         <SettingGroup>
           <ul aria-label="Network requests" className="flex flex-col divide-y">

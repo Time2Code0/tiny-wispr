@@ -55,7 +55,6 @@ How your words get into the app:
 - **Permissions**: shows each permission's status, with a button to grant it or open System Settings.
 - **Where your data lives**: the folder that holds everything the app stores.
 - **Network activity**: every network request the app has ever made, with the address, size, time and result. See [Privacy](privacy.md).
-- **Stay offline**: refuse every network request. Models can't be downloaded, and updates can't be checked, until you turn it off.
 
 ## About
 

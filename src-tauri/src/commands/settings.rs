@@ -53,9 +53,6 @@ pub fn save(
     if before.show_in_dock != settings.show_in_dock {
         show_in_dock(app, settings.show_in_dock);
     }
-    if settings.offline && !before.offline {
-        state.models.pause_all();
-    }
     if before.history_retention != settings.history_retention {
         match state.data.change_history(|_| ()) {
             Ok(()) => events::emit(app, events::HISTORY_CHANGED, ()),

@@ -14,7 +14,6 @@ export function defaultSettings(platform: Platform): Settings {
     launchAtLogin: false,
     llmModel: null,
     microphone: null,
-    offline: false,
     onboardingCompleted: false,
     onboardingStep: "welcome",
     pillHiddenUntil: null,

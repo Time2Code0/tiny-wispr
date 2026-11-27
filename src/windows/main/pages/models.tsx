@@ -6,7 +6,6 @@ import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 
 import { ModelList } from "@/components/model-list";
 import { formatBytes } from "@/components/model-row";
-import { OfflineNotice } from "@/components/offline-notice";
 import {
   AlertDialog,
   AlertDialogClose,
@@ -34,7 +33,6 @@ import { IpcError } from "@/lib/ipc/errors";
 
 import { focusAfterRemoval } from "../focus-after-removal";
 import { Page, Section } from "../page";
-import { hashFor } from "../route";
 import { useSavedSettings } from "../use-saved-settings";
 
 const GIB = 1024 ** 3;
@@ -276,21 +274,6 @@ export function ModelsPage() {
         </p>
       ) : null}
 
-      {settings?.offline ? (
-        <OfflineNotice
-          action={
-            <Button
-              nativeButton={false}
-              render={<a href={hashFor("settings", "privacy")} />}
-              size="sm"
-              variant="outline"
-            >
-              Open Privacy
-            </Button>
-          }
-        />
-      ) : null}
-
       <Section
         description={
           voiceReason
@@ -303,7 +286,6 @@ export function ModelsPage() {
           <ModelList
             kind="voice"
             languages={settings.languages}
-            offline={settings.offline}
             onSelect={useVoice}
             selectedId={settings.sttModel}
           />
@@ -327,7 +309,6 @@ export function ModelsPage() {
             />
             <ModelList
               kind="language"
-              offline={settings.offline}
               onSelect={useLanguage}
               selectedId={settings.llmModel}
             />

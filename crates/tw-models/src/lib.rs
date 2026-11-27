@@ -15,8 +15,6 @@ pub use tw_core::{ModelInfo, ModelKind};
 
 #[derive(Debug, thiserror::Error)]
 pub enum ModelsError {
-    #[error("Downloads are turned off")]
-    Offline,
     #[error("Couldn't reach the download server. Check your internet connection.")]
     Network(#[source] Box<dyn std::error::Error + Send + Sync>),
     #[error("{}", http_message(*status))]

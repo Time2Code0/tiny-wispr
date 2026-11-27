@@ -9,7 +9,7 @@
 | Pure logic | `#[cfg(test)]` in `tw-core`: the state machine, hotkey matcher and validation, history and stats, the model catalog and recommendation, every text step, polish prompts and acceptance | Nothing |
 | Runtime with fakes | `src-tauri/src/dictation/runtime/tests.rs`, `src-tauri/src/files/tests.rs` | Nothing: fake `AudioSource`, `Desktop`, `Transcribers`, `Polisher` and `Sink` |
 | Audio | `crates/tw-audio/tests/` (decoding, speech detection on a spoken fixture) | Nothing |
-| Downloads | `crates/tw-models/tests/download.rs` against a local HTTP server: resume, checksum mismatch, offline, disk space | Nothing |
+| Downloads | `crates/tw-models/tests/download.rs` against a local HTTP server: resume, checksum mismatch, disk space | Nothing |
 | Whisper | `crates/tw-stt/tests/whisper.rs` | `TINY_WISPR_TEST_MODELS` |
 | The worker | `crates/tw-llm-worker/tests/worker.rs`: raw protocol, load errors, streaming | `TINY_WISPR_TEST_MODELS` for the model-backed ones |
 | Network | `crates/tw-models/tests/network.rs`: every catalog URL resolves, a real resumed download | `TINY_WISPR_NETWORK_TESTS=1` |

@@ -17,7 +17,7 @@ The app updates itself from GitHub releases. The user starts every step: a check
 
 ## Why the plugin doesn't fetch
 
-The plugin can check and download by itself with its own HTTP client. The app doesn't let it, so that every request goes through `tw_models::Downloader`: it lands in `network-log.json` like a model download, and "Stay offline" refuses it (the commands return `ErrorKind::Offline`). The flow is:
+The plugin can check and download by itself with its own HTTP client. The app doesn't let it, so that every request goes through `tw_models::Downloader`: it lands in `network-log.json` like a model download. The flow is:
 
 1. `Downloader::get(endpoint)` fetches `latest.json` (1 MB limit).
 2. `Updater::restore_update(json)` turns it into an `Update` when its version is newer than the running one. `None` means up to date. `restore_update` turns on `require_signed_version`.

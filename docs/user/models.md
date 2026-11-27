@@ -45,8 +45,6 @@ Select **Download** on a row. You see progress, and can pause and resume or canc
 
 The "On this computer" list at the bottom of the page shows the space your models take, and lets you delete them.
 
-**Stay offline** under Settings → Privacy blocks all downloads and update checks, in case you want a hard guarantee.
-
 ## Importing your own
 
 **Import** at the bottom of each section takes a file you already have: a Whisper `ggml-*.bin` for voice, or a `.gguf` for language. It's copied into the models folder and shows up as an imported model. This is the way to use a fine-tuned or distilled Whisper model, or a different language model.

@@ -138,8 +138,6 @@ export interface Settings {
   llmModel: string | null;
   /** Input device id; `null` follows the system default. */
   microphone: string | null;
-  /** "Stay offline": no network use, so downloads and update checks are refused. */
-  offline: boolean;
   onboardingCompleted: boolean;
   onboardingStep: OnboardingStep;
   pillHiddenUntil: Millis | null;
@@ -358,8 +356,6 @@ export type ErrorKind =
   | "microphoneBusy"
   /** `start_mic_test`: microphone access is turned off. */
   | "permissionDenied"
-  /** `download_model`, `check_for_updates`, `download_update`: "Stay offline" is on. */
-  | "offline"
   | "io"
   | "internal";
 

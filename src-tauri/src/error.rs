@@ -13,8 +13,6 @@ pub enum ErrorKind {
     MicrophoneBusy,
     /// Microphone access is denied in the system settings.
     PermissionDenied,
-    /// "Stay offline" is on, so nothing may use the network.
-    Offline,
     Io,
     Internal,
 }

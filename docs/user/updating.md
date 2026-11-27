@@ -8,7 +8,7 @@ Open Settings → About. Under **Updates**, click **Check for updates**. The app
 
 To have the app check for you, turn on **Check for updates automatically**. It's off unless you turn it on. When it's on, the app checks a minute after it starts and then once a day while it's open. It only checks: you still choose when to download.
 
-Every check is listed under Settings → Privacy → **Network activity**. With **Stay offline** on, the app doesn't check at all.
+Every check is listed under Settings → Privacy → **Network activity**.
 
 ## Install it
 

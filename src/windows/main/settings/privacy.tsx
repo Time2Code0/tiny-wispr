@@ -25,7 +25,6 @@ import { clearHistory, getHardwareInfo, getStats } from "@/lib/ipc";
 import { Section, SettingGroup, SettingRow } from "../page";
 import { useSavedSettings } from "../use-saved-settings";
 import { NetworkActivity } from "./network-activity";
-import { SwitchRow } from "./switch-row";
 
 const RETENTION: {
   description: string;
@@ -138,10 +137,6 @@ export function PrivacySettings() {
   const hardware = useIpcQuery(getHardwareInfo);
   const { permissions } = usePermissions({ poll: true });
 
-  const setOffline = useCallback(
-    (offline: boolean) => save({ offline }),
-    [save]
-  );
   const setRetention = useCallback(
     (value: unknown) => {
       if (isRetention(value)) {
@@ -226,16 +221,7 @@ export function PrivacySettings() {
         </div>
       </Section>
 
-      <NetworkActivity>
-        <SettingGroup>
-          <SwitchRow
-            checked={settings.offline}
-            description="Block all network use. Model downloads and update checks won't start until you turn this off."
-            label="Stay offline"
-            onCheckedChange={setOffline}
-          />
-        </SettingGroup>
-      </NetworkActivity>
+      <NetworkActivity />
     </>
   );
 }

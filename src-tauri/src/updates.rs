@@ -1,7 +1,7 @@
 //! The in-app updater (`docs/internals/updates.md`). Every request goes
-//! through the app's `Downloader`, so it is in the network log and "Stay
-//! offline" refuses it. The updater plugin makes no requests: it reads the
-//! manifest, checks the archive's signature and swaps the app bundle.
+//! through the app's `Downloader`, so it is in the network log. The updater
+//! plugin makes no requests: it reads the manifest, checks the archive's
+//! signature and swaps the app bundle.
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -12,7 +12,7 @@ use tw_core::updates::{self, Release, UpdateState};
 use tw_core::{DictationPhase, Millis};
 use tw_models::{Downloader, ModelsError};
 
-use crate::error::{CommandError, CommandResult, ErrorKind};
+use crate::error::{CommandError, CommandResult};
 use crate::files::FileJobs;
 use crate::state::{AppState, lock};
 use crate::windows::now_ms;
@@ -60,19 +60,12 @@ impl Updates {
 
     /// "Check for updates". Runs in the background; the result arrives as
     /// `updates:state`.
-    pub fn check(self: &Arc<Self>, app: &AppHandle, offline: bool) -> CommandResult<()> {
-        if offline {
-            return Err(offline_error("check for updates"));
-        }
+    pub fn check(self: &Arc<Self>, app: &AppHandle) {
         self.start_check(app, false);
-        Ok(())
     }
 
     /// Downloads and verifies the release the last check found.
-    pub fn download(self: &Arc<Self>, app: &AppHandle, offline: bool) -> CommandResult<()> {
-        if offline {
-            return Err(offline_error("download the update"));
-        }
+    pub fn download(self: &Arc<Self>, app: &AppHandle) -> CommandResult<()> {
         let update = lock(&self.found)
             .clone()
             .ok_or_else(|| CommandError::invalid("Check for updates first"))?;
@@ -162,7 +155,6 @@ impl Updates {
                 let settings = state.data.settings.get();
                 let due = updates::auto_check_due(
                     settings.check_for_updates,
-                    settings.offline,
                     this.launched_at,
                     *lock(&this.last_check),
                     now_ms(),
@@ -353,13 +345,6 @@ fn fetch_message(err: &ModelsError) -> String {
     }
 }
 
-fn offline_error(what: &str) -> CommandError {
-    CommandError::new(
-        ErrorKind::Offline,
-        format!("Stay offline is on, so Tiny Wispr can't {what}"),
-    )
-}
-
 fn spawn(name: &str, run: impl FnOnce() + Send + 'static) {
     if let Err(err) = std::thread::Builder::new().name(name.into()).spawn(run) {
         tracing::warn!(%err, thread = name, "could not start the updater thread");
@@ -383,16 +368,6 @@ mod tests {
         assert_eq!(
             fetch_message(&ModelsError::Network("reset".into())),
             "Couldn't reach the update server. Check your internet connection."
-        );
-    }
-
-    #[test]
-    fn offline_errors_say_why() {
-        let err = offline_error("check for updates");
-        assert_eq!(err.kind, ErrorKind::Offline);
-        assert_eq!(
-            err.message,
-            "Stay offline is on, so Tiny Wispr can't check for updates"
         );
     }
 }

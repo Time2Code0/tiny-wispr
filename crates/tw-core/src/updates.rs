@@ -100,12 +100,11 @@ impl UpdateState {
 /// finished check, automatic or not, since `launched_at`.
 pub fn auto_check_due(
     enabled: bool,
-    offline: bool,
     launched_at: Millis,
     last_check: Option<Millis>,
     now: Millis,
 ) -> bool {
-    if !enabled || offline {
+    if !enabled {
         return false;
     }
     match last_check {
@@ -224,7 +223,7 @@ mod tests {
     #[test]
     fn automatic_checks_wait_for_launch_then_a_day() {
         let launched = 1_000_000;
-        let due = |last, now| auto_check_due(true, false, launched, last, now);
+        let due = |last, now| auto_check_due(true, launched, last, now);
         assert!(!due(None, launched + FIRST_CHECK_DELAY_MS - 1));
         assert!(due(None, launched + FIRST_CHECK_DELAY_MS));
         let last = launched + 5_000_000;
@@ -233,10 +232,9 @@ mod tests {
     }
 
     #[test]
-    fn automatic_checks_need_the_setting_and_the_network() {
+    fn automatic_checks_need_the_setting() {
         let now = 10 * CHECK_INTERVAL_MS;
-        assert!(!auto_check_due(false, false, 0, None, now));
-        assert!(!auto_check_due(true, true, 0, None, now));
-        assert!(auto_check_due(true, false, 0, None, now));
+        assert!(!auto_check_due(false, 0, None, now));
+        assert!(auto_check_due(true, 0, None, now));
     }
 }

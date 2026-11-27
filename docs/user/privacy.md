@@ -19,7 +19,6 @@ The app doesn't phone home in any other way.
 Don't take our word for it:
 
 - Settings → Privacy → **Network activity** lists every request the app has made: the full address, how much was transferred, when, and whether it finished, was cancelled or failed.
-- **Stay offline** in the same place makes the app refuse every network request, update checks included.
 - The source is open, and every request goes through one place: the downloader in the `tw-models` crate.
 
 ## Where your data lives

@@ -25,7 +25,7 @@ All serde types use `#[serde(rename_all = "camelCase")]`, enums included. Enums 
 
 Every command returns `CommandResult<T>` = `Result<T, CommandError>`. `CommandError` serialises as `{ kind, message }`; the frontend wraps it in `IpcError` (`src/lib/ipc/errors.ts`).
 
-`ErrorKind`: `notImplemented`, `invalidInput`, `notFound`, `permissionMissing`, `noMicrophone`, `microphoneBusy`, `permissionDenied`, `offline` (Stay offline refused a download or an update check), `io`, `internal`. The UI branches on `kind` and shows `message` (which is written for people, in the product's voice). Library errors convert with `From` impls (`ModelsError` → `CommandError` in `models.rs`).
+`ErrorKind`: `notImplemented`, `invalidInput`, `notFound`, `permissionMissing`, `noMicrophone`, `microphoneBusy`, `permissionDenied`, `io`, `internal`. The UI branches on `kind` and shows `message` (which is written for people, in the product's voice). Library errors convert with `From` impls (`ModelsError` → `CommandError` in `models.rs`).
 
 ## Commands
 
@@ -43,7 +43,7 @@ Every command returns `CommandResult<T>` = `Result<T, CommandError>`. `CommandEr
 | App | `complete_onboarding`, `open_main_window(route)`, `hide_pill_for(minutes)`, `set_pill_hit_regions(rects)`, `list_network_log` |
 | Updates | `get_update_state`, `check_for_updates`, `download_update`, `install_update` ([Updates](updates.md)) |
 
-`update_settings` takes a `SettingsPatch`: absent fields are left alone, and for nullable settings an explicit `null` clears the value (`Option<Option<T>>` with a `double_option` deserializer). It registers or removes the login item when `launch_at_login` changes, then `save()` persists, emits `settings:changed`, and applies what takes effect immediately: pill visibility, the swallowed shortcuts (`Msg::SettingsChanged`), the tray's microphone list, Dock visibility, pausing downloads when `offline` turns on, and history retention. It does **not** validate shortcuts: the recorder calls `validate_hotkey` first.
+`update_settings` takes a `SettingsPatch`: absent fields are left alone, and for nullable settings an explicit `null` clears the value (`Option<Option<T>>` with a `double_option` deserializer). It registers or removes the login item when `launch_at_login` changes, then `save()` persists, emits `settings:changed`, and applies what takes effect immediately: pill visibility, the swallowed shortcuts (`Msg::SettingsChanged`), the tray's microphone list, Dock visibility, and history retention. It does **not** validate shortcuts: the recorder calls `validate_hotkey` first.
 
 ## Events
 
@@ -91,7 +91,7 @@ __tinyWisprMock.level(0.8)                   // fixed input level, null for simu
 __tinyWisprMock.listener("secureInput")      // listener banner states
 __tinyWisprMock.micTestFails("noMicrophone")
 __tinyWisprMock.fileFails("noSpeech")
-__tinyWisprMock.settings({ offline: true })
+__tinyWisprMock.settings({ checkForUpdates: true })
 __tinyWisprMock.update("ready")              // updater states, with a sample release
 __tinyWisprMock.updateOutcome("upToDate")    // what the next check finds: available, upToDate, checkFails, downloadFails
 __tinyWisprMock.navigate("settings")

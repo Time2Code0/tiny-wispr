@@ -118,14 +118,8 @@ impl Models {
     }
 
     /// Starts or resumes a download; progress arrives as `models:progress`.
-    /// With "Stay offline" on it fails with `ErrorKind::Offline` instead.
-    pub fn download(
-        self: &Arc<Self>,
-        app: &AppHandle,
-        id: &str,
-        offline: bool,
-    ) -> CommandResult<()> {
-        let Some((request, cancel)) = self.begin(id, offline)? else {
+    pub fn download(self: &Arc<Self>, app: &AppHandle, id: &str) -> CommandResult<()> {
+        let Some((request, cancel)) = self.begin(id)? else {
             return Ok(());
         };
         let this = Arc::clone(self);
@@ -142,14 +136,7 @@ impl Models {
 
     /// Registers a download that may start, or `None` when it is already
     /// downloaded or running.
-    fn begin(
-        &self,
-        id: &str,
-        offline: bool,
-    ) -> CommandResult<Option<(DownloadRequest, Arc<AtomicBool>)>> {
-        if offline {
-            return Err(ModelsError::Offline.into());
-        }
+    fn begin(&self, id: &str) -> CommandResult<Option<(DownloadRequest, Arc<AtomicBool>)>> {
         let model = self.find(id)?;
         if model.status == ModelStatus::Downloaded {
             return Ok(None);
@@ -213,15 +200,6 @@ impl Models {
         }
     }
 
-    /// "Stay offline" was turned on: pauses every running download.
-    pub fn pause_all(&self) {
-        for transfer in lock(&self.transfers).values() {
-            if let Transfer::Running { cancel, .. } = transfer {
-                cancel.store(true, Ordering::Relaxed);
-            }
-        }
-    }
-
     pub fn delete(&self, id: &str) -> CommandResult<ModelInfo> {
         if matches!(
             lock(&self.transfers).get(id),
@@ -262,7 +240,6 @@ pub fn voice_model_path(inventory: &Inventory, selected: Option<&str>) -> Option
 impl From<ModelsError> for CommandError {
     fn from(err: ModelsError) -> Self {
         let kind = match err {
-            ModelsError::Offline => ErrorKind::Offline,
             ModelsError::NotFound { .. } => ErrorKind::NotFound,
             ModelsError::WrongFormat { .. }
             | ModelsError::InvalidFileName(_)
@@ -281,8 +258,6 @@ mod tests {
     use std::fs;
 
     use super::*;
-    use crate::network_log;
-    use crate::state::{AppPaths, Data};
     use crate::store::tests::temp_dir;
 
     fn place(inventory: &Inventory, id: &str) {
@@ -309,37 +284,9 @@ mod tests {
     }
 
     #[test]
-    fn staying_offline_refuses_downloads_without_a_request() {
-        let dir = temp_dir("models-offline");
-        let data = Arc::new(Data::load(AppPaths::new(&dir)));
-        let log_data = Arc::clone(&data);
-        let downloader = Downloader::new()
-            .with_request_log(move |record| network_log::record(&log_data, record));
-        let models = Models::new(Inventory::new(dir.join("models")), downloader);
-
-        let err = models.begin("tiny.en", true).unwrap_err();
-        assert_eq!(err.kind, ErrorKind::Offline);
-        assert!(lock(&models.transfers).is_empty());
-        assert!(data.network_log.get().is_empty());
-
-        assert!(models.begin("tiny.en", false).unwrap().is_some());
-        models.pause_all();
-        let transfers = lock(&models.transfers);
-        let Some(Transfer::Running { cancel, .. }) = transfers.get("tiny.en") else {
-            panic!("the download was not registered");
-        };
-        assert!(cancel.load(Ordering::Relaxed));
-        drop(transfers);
-        fs::remove_dir_all(dir).unwrap();
-    }
-
-    #[test]
     fn list_overlays_running_and_failed_downloads() {
         let dir = temp_dir("models-list");
-        let models = Models::new(
-            Inventory::new(dir.join("models")),
-            Downloader::new().offline(true),
-        );
+        let models = Models::new(Inventory::new(dir.join("models")), Downloader::new());
         lock(&models.transfers).insert(
             "base".into(),
             Transfer::Running {

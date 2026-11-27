@@ -17,12 +17,10 @@ pub async fn list_models(state: State<'_, AppState>) -> CommandResult<Vec<ModelI
 }
 
 /// Starts or resumes a download in the background; progress arrives as
-/// `models:progress`, the end as `models:changed`. Refused while "Stay
-/// offline" is on.
+/// `models:progress`, the end as `models:changed`.
 #[tauri::command]
 pub fn download_model(app: AppHandle, state: State<'_, AppState>, id: String) -> CommandResult<()> {
-    let offline = state.data.settings.get().offline;
-    state.models.download(&app, &id, offline)
+    state.models.download(&app, &id)
 }
 
 /// Pauses the download; the next `download_model` resumes it.

@@ -73,7 +73,6 @@ type RequestLog = Box<dyn Fn(&RequestRecord) + Send + Sync>;
 /// Blocking HTTPS downloader. Holds a connection pool, so keep one around.
 pub struct Downloader {
     agent: Agent,
-    offline: bool,
     log: Option<RequestLog>,
 }
 
@@ -94,19 +93,7 @@ impl Downloader {
             .timeout_per_read(Some(Duration::from_secs(30)))
             .build()
             .into();
-        Self {
-            agent,
-            offline: false,
-            log: None,
-        }
-    }
-
-    /// When set, every download fails with `ModelsError::Offline` without
-    /// touching the network.
-    #[must_use]
-    pub fn offline(mut self, offline: bool) -> Self {
-        self.offline = offline;
-        self
+        Self { agent, log: None }
     }
 
     /// Called once for every HTTP request, after it ends.
@@ -169,9 +156,6 @@ impl Downloader {
         limit: u64,
         on_progress: &mut dyn FnMut(u64, Option<u64>),
     ) -> Result<Vec<u8>> {
-        if self.offline {
-            return Err(ModelsError::Offline);
-        }
         let started = now();
         let mut body = Vec::new();
         let result = self.get_into(url, limit, &mut body, on_progress);
@@ -245,9 +229,6 @@ impl Downloader {
         progress: &mut Progress<'_>,
         cancel: &AtomicBool,
     ) -> Result<PathBuf> {
-        if self.offline {
-            return Err(ModelsError::Offline);
-        }
         let destination = inventory.path(request.kind, &request.file)?;
         let partial_path = inventory.partial_path(request.kind, &request.file)?;
         let dir = inventory.dir(request.kind);

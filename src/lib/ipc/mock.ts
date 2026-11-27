@@ -800,7 +800,6 @@ export function createMockBackend(): Backend {
   }
 
   function setSettings(next: Settings) {
-    const goesOffline = next.offline && !state.settings.offline;
     state.settings = next;
     saveSettings(next);
     state.history = keptByRetention(
@@ -809,11 +808,6 @@ export function createMockBackend(): Backend {
       Date.now()
     );
     emit("settings:changed", next);
-    if (goesOffline) {
-      for (const id of [...timers.downloads.keys()]) {
-        handlers.cancel_download({ id });
-      }
-    }
     return next;
   }
 
@@ -1137,7 +1131,6 @@ export function createMockBackend(): Backend {
     currentVersion: version,
     emit: (update) => emit("updates:state", update),
     log: (request) => state.networkLog.push(request),
-    offline: () => state.settings.offline,
     restart: () => window.location.reload(),
   });
 
@@ -1229,9 +1222,6 @@ export function createMockBackend(): Backend {
       return null;
     },
     download_model: ({ id }) => {
-      if (state.settings.offline) {
-        throw new IpcError("offline", "Downloads are turned off");
-      }
       const model = findModel(id);
       if (model.status.state === "downloaded" || timers.downloads.has(id)) {
         return null;

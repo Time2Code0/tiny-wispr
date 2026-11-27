@@ -216,7 +216,6 @@ function Downloading({
 }
 
 function Action({
-  downloadsBlocked,
   emphasis,
   inUse,
   label,
@@ -224,7 +223,6 @@ function Action({
   onUse,
   status,
 }: {
-  downloadsBlocked: boolean;
   emphasis: boolean;
   inUse: boolean;
   label: string;
@@ -237,7 +235,6 @@ function Action({
       return (
         <Button
           aria-label={`Download ${label}`}
-          disabled={downloadsBlocked}
           onClick={onDownload}
           size="sm"
           type="button"
@@ -250,7 +247,6 @@ function Action({
       return (
         <Button
           aria-label={`Resume download of ${label}`}
-          disabled={downloadsBlocked}
           onClick={onDownload}
           size="sm"
           type="button"
@@ -263,7 +259,6 @@ function Action({
       return (
         <Button
           aria-label={`Retry download of ${label}`}
-          disabled={downloadsBlocked}
           onClick={onDownload}
           size="sm"
           type="button"
@@ -309,7 +304,6 @@ export function ModelRow({
   chosen,
   selectedId,
   emphasis = false,
-  downloadsBlocked = false,
   onChoose,
   onDownload,
   onPause,
@@ -323,8 +317,6 @@ export function ModelRow({
   selectedId: string | null;
   /** Give the action the primary style, e.g. for the recommended model. */
   emphasis?: boolean;
-  /** "Stay offline" is on: Download, Resume and Retry are disabled. */
-  downloadsBlocked?: boolean;
   onChoose: (id: string) => void;
   onDownload: (id: string) => void;
   onPause: (id: string) => void;
@@ -369,7 +361,6 @@ export function ModelRow({
       <div className="flex justify-end">
         {status.state === "downloading" ? null : (
           <Action
-            downloadsBlocked={downloadsBlocked}
             emphasis={emphasis}
             inUse={inUse}
             label={chosen.label}

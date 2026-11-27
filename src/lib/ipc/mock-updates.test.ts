@@ -2,12 +2,11 @@ import type { NetworkRequest, UpdateState } from "./types";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { IpcError } from "./errors";
 import { createMockUpdates, nextVersion } from "./mock-updates";
 
 const MANIFEST = /latest\.json$/;
 
-function setup(options: { busy?: boolean; offline?: boolean } = {}) {
+function setup(options: { busy?: boolean } = {}) {
   const states: UpdateState[] = [];
   const log: NetworkRequest[] = [];
   const restart = vi.fn();
@@ -16,7 +15,6 @@ function setup(options: { busy?: boolean; offline?: boolean } = {}) {
     currentVersion: "0.1.0",
     emit: (state) => states.push(state),
     log: (request) => log.push(request),
-    offline: () => options.offline ?? false,
     restart,
   });
   return { log, restart, states, updates };
@@ -72,13 +70,6 @@ describe("mock updates", () => {
     const failed = updates.state();
     expect(failed.state === "failed" && failed.release?.version).toBe("0.1.1");
     expect(log.at(-1)?.result).toBe("failed");
-  });
-
-  it("refuses to check while staying offline", () => {
-    const { log, updates } = setup({ offline: true });
-    expect(() => updates.check()).toThrow(IpcError);
-    expect(updates.state().state).toBe("idle");
-    expect(log).toEqual([]);
   });
 
   it("won't restart during a dictation", () => {

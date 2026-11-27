@@ -56,7 +56,6 @@ That's cleanup. Under Style, set cleanup to **None** for the raw transcript, or 
 
 ## Downloads fail or won't start
 
-- If **Stay offline** is on under Settings → Privacy, turn it off.
 - A failed download keeps what it got: select Download again to resume.
 - Check Network activity under Settings → Privacy for the address and error.
 - Make sure you have free disk space: the app leaves 100 MB spare and refuses downloads that don't fit.

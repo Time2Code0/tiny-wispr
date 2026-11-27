@@ -11,16 +11,14 @@ pub fn get_update_state(state: State<'_, AppState>) -> UpdateState {
 
 /// Starts a check; the result arrives as `updates:state`.
 #[tauri::command]
-pub fn check_for_updates(app: AppHandle, state: State<'_, AppState>) -> CommandResult<()> {
-    let offline = state.data.settings.get().offline;
-    state.updates.check(&app, offline)
+pub fn check_for_updates(app: AppHandle, state: State<'_, AppState>) {
+    state.updates.check(&app);
 }
 
 /// Starts downloading the release the last check found.
 #[tauri::command]
 pub fn download_update(app: AppHandle, state: State<'_, AppState>) -> CommandResult<()> {
-    let offline = state.data.settings.get().offline;
-    state.updates.download(&app, offline)
+    state.updates.download(&app)
 }
 
 /// Installs the downloaded update and restarts the app.

@@ -524,30 +524,6 @@ fn follows_redirects_and_resumes_through_them() {
 }
 
 #[test]
-fn offline_fails_fast_without_a_request() {
-    let body = data(1_000);
-    let server = Server::start(vec![("/m", file(&body, true))]);
-    let tmp = TempDir::new();
-    let inventory = Inventory::new(&tmp.0);
-    let records = Arc::new(Mutex::new(Vec::new()));
-    let sink = Arc::clone(&records);
-    let downloader = Downloader::new()
-        .offline(true)
-        .with_request_log(move |r: &RequestRecord| sink.lock().unwrap().push(r.clone()));
-
-    let run = run(&downloader, &inventory, &request(server.url("/m"), &body));
-
-    assert!(
-        matches!(run.result, Err(ModelsError::Offline)),
-        "{:?}",
-        run.result
-    );
-    assert!(server.seen().is_empty());
-    assert!(records.lock().unwrap().is_empty());
-    assert!(!tmp.0.exists(), "nothing is written either");
-}
-
-#[test]
 fn unreachable_server_is_a_network_error() {
     let addr = TcpListener::bind("127.0.0.1:0")
         .unwrap()
@@ -642,7 +618,7 @@ fn get_refuses_a_body_over_the_limit() {
 }
 
 #[test]
-fn get_reports_http_errors_and_offline() {
+fn get_reports_http_errors() {
     let server = Server::start(vec![]);
     let (downloader, records) = logged();
 
@@ -654,11 +630,4 @@ fn get_reports_http_errors_and_offline() {
         "{error:?}"
     );
     assert_eq!(records.lock().unwrap().len(), 1);
-
-    let error = Downloader::new()
-        .offline(true)
-        .get(&server.url("/missing"), 1_000, &mut |_, _| ())
-        .unwrap_err();
-    assert!(matches!(error, ModelsError::Offline), "{error:?}");
-    assert_eq!(server.seen().len(), 1, "offline makes no request");
 }

@@ -132,7 +132,6 @@ export function UpdatesSection() {
     return null;
   }
 
-  const { offline } = settings;
   const release = releaseOf(update);
 
   return (
@@ -148,7 +147,7 @@ export function UpdatesSection() {
             control={
               row.action ? (
                 <Button
-                  disabled={offline || row.busy}
+                  disabled={row.busy}
                   loading={row.busy || pending === row.action.kind}
                   onClick={run}
                   size="sm"
@@ -159,11 +158,7 @@ export function UpdatesSection() {
                 </Button>
               ) : null
             }
-            description={
-              offline
-                ? "Stay offline is on. Turn it off in Privacy to check for updates."
-                : row.description
-            }
+            description={row.description}
             label={row.label}
           />
         )}

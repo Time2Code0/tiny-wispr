@@ -93,9 +93,6 @@ pub struct Settings {
     pub show_in_dock: bool,
     pub theme: Theme,
     pub history_retention: HistoryRetention,
-    /// "Stay offline": no network use at all, so model downloads and update
-    /// checks are refused.
-    pub offline: bool,
     /// Look for a new version once a day. Off unless the user turns it on;
     /// "Check for updates" works either way.
     pub check_for_updates: bool,
@@ -125,7 +122,6 @@ impl Default for Settings {
             show_in_dock: true,
             theme: Theme::System,
             history_retention: HistoryRetention::Forever,
-            offline: false,
             check_for_updates: false,
             onboarding_completed: false,
             onboarding_step: OnboardingStep::Welcome,
@@ -193,8 +189,6 @@ pub struct SettingsPatch {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub history_retention: Option<HistoryRetention>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub offline: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub check_for_updates: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub onboarding_completed: Option<bool>,
@@ -232,7 +226,6 @@ impl Settings {
             show_in_dock,
             theme,
             history_retention,
-            offline,
             check_for_updates,
             onboarding_completed,
             onboarding_step,
@@ -254,7 +247,6 @@ impl Settings {
         set(&mut self.show_in_dock, show_in_dock);
         set(&mut self.theme, theme);
         set(&mut self.history_retention, history_retention);
-        set(&mut self.offline, offline);
         set(&mut self.check_for_updates, check_for_updates);
         set(&mut self.onboarding_completed, onboarding_completed);
         set(&mut self.onboarding_step, onboarding_step);
@@ -278,7 +270,7 @@ mod tests {
         let s = Settings::default();
         assert_eq!(s.cleanup_level, CleanupLevel::Light);
         assert!(s.show_pill_always && s.sounds && s.restore_clipboard);
-        assert!(!s.onboarding_completed && !s.launch_at_login && !s.offline);
+        assert!(!s.onboarding_completed && !s.launch_at_login);
         assert!(!s.check_for_updates, "update checks are opt-in");
         assert_eq!(s.onboarding_step, OnboardingStep::Welcome);
         assert_eq!(s.styles.email, WritingStyle::Formal);
@@ -297,8 +289,15 @@ mod tests {
     #[test]
     fn missing_fields_fall_back_to_defaults() {
         let s: Settings = serde_json::from_str(r#"{ "sounds": false }"#).unwrap();
-        assert!(!s.sounds && !s.offline);
+        assert!(!s.sounds);
         assert_eq!(s.theme, Theme::System);
+    }
+
+    #[test]
+    fn removed_fields_are_ignored() {
+        let s: Settings = serde_json::from_str(r#"{ "offline": true, "sounds": false }"#).unwrap();
+        assert!(!s.sounds);
+        assert!(!serde_json::to_string(&s).unwrap().contains("offline"));
     }
 
     #[test]

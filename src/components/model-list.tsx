@@ -233,7 +233,6 @@ export function ModelList({
   kind,
   selectedId,
   onSelect,
-  offline = false,
   languages: dictationLanguages,
   className,
 }: {
@@ -241,8 +240,6 @@ export function ModelList({
   /** The model in use for this kind (`settings.sttModel` or `llmModel`). */
   selectedId: string | null;
   onSelect: (id: string) => void;
-  /** "Stay offline" is on, so downloads can't start. */
-  offline?: boolean;
   /** `settings.languages`, which picks the voice models shown first. */
   languages?: Languages;
   className?: string;
@@ -347,7 +344,6 @@ export function ModelList({
     return (
       <ModelRow
         chosen={picked}
-        downloadsBlocked={offline}
         emphasis={picked.recommended && selectedId === null}
         key={group.id}
         onChoose={choose}
