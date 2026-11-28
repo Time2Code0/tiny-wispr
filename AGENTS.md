@@ -1,6 +1,22 @@
 # Tiny Wispr
 
-A local, private dictation app: hold a key, speak, release, and the text is transcribed on this device and pasted into the focused app. No account, no cloud, no telemetry. The only network requests are model downloads the user asked for and update checks (when the user clicks "Check for updates", or once a day if they turned that on).
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues for Time2Code0/tiny-wispr, managed with the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root, both created when first needed. See `docs/agents/domain.md`.
+
+## Introduction
+
+Tiny Wispr is a local, private dictation app: hold a key, speak, release, and the text is transcribed on this device and pasted into the focused app. No account, no cloud, no telemetry. The only network requests are model downloads the user asked for and update checks (when the user clicks "Check for updates", or once a day if they turned that on).
 
 Tauri v2 app. The Rust workspace and the Vite + React frontend both live at the repo root.
 

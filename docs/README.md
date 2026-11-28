@@ -40,6 +40,14 @@ For building, testing and shipping.
 - [Testing](operations/testing.md): the test layers and how to test without a microphone
 - [Building and releasing](operations/building-and-releasing.md): release builds, the worker sidecar, signing, the release workflow
 
+## Agent skills
+
+Configuration for the engineering skills that file issues, triage and keep domain docs.
+
+- [Issue tracker](agents/issue-tracker.md): GitHub Issues through the `gh` CLI
+- [Triage labels](agents/triage-labels.md): the label for each triage role
+- [Domain docs](agents/domain.md): how agents read `GLOSSARY.md` and `docs/adr/`
+
 The conventions that apply to every change (code style, UI tokens, commit messages) are in [AGENTS.md](../AGENTS.md).
 
 ## Keeping the docs true
